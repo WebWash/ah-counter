@@ -15,6 +15,7 @@ use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\DependencyInjection\Attribute\Target;
 
 /**
  * Makes one real call to each provider so a developer (or a judge) can check their keys.
@@ -28,7 +29,7 @@ final class AiSmokeCommand extends Command
     public function __construct(
         #[Autowire(service: 'ai.platform.anthropic')]
         private readonly PlatformInterface $anthropic,
-        #[Autowire(service: 'ai.platform.deepgram')]
+        #[Target('deepgram')]
         private readonly PlatformInterface $deepgram,
         #[Autowire(env: 'AI_JUDGE_MODEL')]
         private readonly string $judgeModel,
@@ -76,8 +77,8 @@ final class AiSmokeCommand extends Command
 
         $io->text('Sentence: '.self::SAMPLE);
         $io->table(
-            ['Filler', 'Count'],
-            array_map(static fn (FillerCount $f): array => [$f->word, $f->count], $tally->fillers),
+            ['Filler Type', 'Count'],
+            array_map(static fn (FillerCount $filler): array => [$filler->type, $filler->count], $tally->fillers),
         );
         $io->text(\sprintf('Total: %d', $tally->total));
         $io->success('Anthropic OK: response_format, asObject() and the nested DTO list all work.');
@@ -115,7 +116,7 @@ final class AiSmokeCommand extends Command
 
         $words = $data['results']['channels'][0]['alternatives'][0]['words'] ?? [];
         $io->text(\sprintf('Duration: %s s, words: %d', $data['metadata']['duration'] ?? '?', \count($words)));
-        $io->text('Transcript: '.implode(' ', array_map(static fn (array $w): string => (string) ($w['punctuated_word'] ?? $w['word']), $words)));
+        $io->text('Transcript: '.implode(' ', array_map(static fn (array $word): string => (string) ($word['punctuated_word'] ?? $word['word']), $words)));
         $io->success('Deepgram OK: word-level data read from the raw result.');
 
         return true;

@@ -10,7 +10,7 @@ namespace App\Smoke;
 final readonly class FillerCount
 {
     public function __construct(
-        public string $word,
+        public string $type,
         public int $count,
     ) {
     }
