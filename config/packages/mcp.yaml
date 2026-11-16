@@ -1,0 +1,12 @@
+mcp:
+    servers:
+        default:
+            name: 'ah-counter'
+            version: '1.0.0'
+            instructions: 'Query Ah Counter speech reports: filler words, statistics, comparisons and practice exercises.'
+            # STDIO only (bin/console mcp:server); no HTTP route.
+            transports:
+                stdio: true
+                http: false
+            # '*' is shorthand for every kind (tools, prompts, resources, ...). Must not be empty.
+            registry: '*'

@@ -35,7 +35,7 @@ Vocabulary: use the terms in `GLOSSARY.md` exactly (**Speech**, **Recording**, *
 
 - A tool is a thin wrapper (`#[McpTool]`, `#[Schema]`) over a `src/` service. Business logic stays in the service.
 - Every tool calls `EntityManager::clear()` before loading, because the worker updates Speeches from another process.
-- An unknown ID, or a Speech that isn't `done`, raises the SDK's tool-error exception with a readable message.
+- An unknown ID, or a Speech that isn't `done`, throws `Mcp\Exception\ToolCallException` with a readable message, which the client receives as `isError: true`. Any other exception reaches the client as a bare "internal error".
 - STDOUT carries JSON-RPC only. Logs go to a file or STDERR.
 
 ## Tests

@@ -1,0 +1,7 @@
+ai:
+    # Keys checked against `bin/console config:dump-reference ai` (symfony/ai-bundle 1.0.0-BETA1).
+    platform:
+        anthropic:
+            api_key: '%env(ANTHROPIC_API_KEY)%'
+        deepgram:
+            api_key: '%env(DEEPGRAM_API_KEY)%'
