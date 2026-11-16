@@ -1,0 +1,16 @@
+framework:
+    messenger:
+        failure_transport: failed
+
+        transports:
+            # Doctrine transport on the same SQLite DB; in-memory:// in the test env (.env.test).
+            async:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                retry_strategy:
+                    max_retries: 3
+                    delay: 2000
+                    multiplier: 3
+            failed: '%env(MESSENGER_FAILED_TRANSPORT_DSN)%'
+
+        routing:
+            # 'App\Message\ProcessSpeech': async

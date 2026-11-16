@@ -1,0 +1,10 @@
+#!/bin/sh
+# Rejects commits whose message contains a Co-authored-by trailer.
+# Installed via: git config core.hooksPath .githooks
+
+if grep -qiE '^[[:space:]]*co-authored-by:' "$1"; then
+  echo "commit-msg hook: rejected — commit message contains a 'Co-authored-by:' line." >&2
+  echo "Remove the co-author trailer and commit again." >&2
+  exit 1
+fi
+exit 0

@@ -1,0 +1,5 @@
+workers:
+    # Exactly one Messenger consumer (SPEC §3).
+    messenger_consume_async: ~
+    tailwind:
+        cmd: ['symfony', 'console', 'tailwind:build', '--watch']
