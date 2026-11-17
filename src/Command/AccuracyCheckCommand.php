@@ -13,7 +13,8 @@ use App\Analysis\FillerKind;
 use App\Analysis\FillerOccurrence;
 use App\Analysis\Lexicon;
 use App\Analysis\Verdict;
-use App\Transcription\Word;
+use App\Report\TranscriptMarker;
+use App\Transcription\Transcript;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
@@ -45,6 +46,7 @@ final class AccuracyCheckCommand extends Command
         private readonly AccuracyRecordingLoader $recordingLoader,
         private readonly FillerDetector $detector,
         private readonly CandidateJudge $judge,
+        private readonly TranscriptMarker $marker,
         #[AutowireLocator(AccuracyTranscriber::TAG)]
         private readonly ServiceProviderInterface $transcribers,
         #[Autowire('%kernel.project_dir%')]
@@ -141,7 +143,7 @@ final class AccuracyCheckCommand extends Command
                 }
 
                 if ($io->isVerbose()) {
-                    $this->printVerdicts($io, $transcription->transcript->words, $occurrences);
+                    $this->printVerdicts($io, $transcription->transcript, $occurrences);
                 }
             }
 
@@ -164,8 +166,8 @@ final class AccuracyCheckCommand extends Command
         $sounds = array_values(array_filter($occurrences, static fn (FillerOccurrence $o): bool => FillerKind::Sound === $o->kind));
         $phrases = array_values(array_filter($occurrences, static fn (FillerOccurrence $o): bool => FillerKind::Phrase === $o->kind));
 
-        [$soundRows, $soundTotal] = $this->group('All Filler Sounds', array_keys(Lexicon::FILLER_SOUNDS), $sounds, $recording->expected, true);
-        [$phraseRows, $phraseTotal] = $this->group('All Filler Phrases', Lexicon::FILLER_PHRASES, $phrases, $recording->expected, $judged);
+        [$soundRows, $soundTotal] = $this->group(FillerKind::Sound, $sounds, $recording->expected, true);
+        [$phraseRows, $phraseTotal] = $this->group(FillerKind::Phrase, $phrases, $recording->expected, $judged);
 
         // Hand-counted types the lexicon doesn't know, so they can never be detected.
         $unknown = [];
@@ -183,18 +185,20 @@ final class AccuracyCheckCommand extends Command
     }
 
     /**
-     * The rows of one kind (Filler Sounds or Filler Phrases) and their total.
+     * The rows of one kind (Filler Sounds or Filler Phrases) and their total. Only Filler Phrases
+     * have a Candidates column.
      *
-     * @param list<string>            $types       the kind's Filler Types, in lexicon order
      * @param list<FillerOccurrence>  $occurrences this kind only
      * @param array<string, int>|null $handCount
      * @param bool                    $counted     false for unjudged Candidates: detected shows n/a
      *
      * @return array{list<list<string|int>>, array{list<string|int>, int, int}} rows, then [total row, expected, detected]
      */
-    private function group(string $label, array $types, array $occurrences, ?array $handCount, bool $counted): array
+    private function group(FillerKind $kind, array $occurrences, ?array $handCount, bool $counted): array
     {
-        $isSound = 'All Filler Sounds' === $label;
+        $isSound = FillerKind::Sound === $kind;
+        $types = $isSound ? array_keys(Lexicon::FILLER_SOUNDS) : Lexicon::FILLER_PHRASES;
+        $label = 'All '.$kind->label().'s';
         $rows = [];
         $expectedTotal = 0;
         $foundTotal = 0;
@@ -232,17 +236,18 @@ final class AccuracyCheckCommand extends Command
     }
 
     /**
-     * @param list<Word> $words
-     * @param list<FillerOccurrence>         $occurrences
+     * Each Candidate's verdict, in context, with the judge's reason.
+     *
+     * @param list<FillerOccurrence> $occurrences
      */
-    private function printVerdicts(SymfonyStyle $io, array $words, array $occurrences): void
+    private function printVerdicts(SymfonyStyle $io, Transcript $transcript, array $occurrences): void
     {
         $rows = [];
         foreach ($occurrences as $occurrence) {
             if (FillerKind::Phrase !== $occurrence->kind) {
                 continue;
             }
-            $context = \array_slice($words, max(0, $occurrence->wordStart - 4), min($occurrence->wordStart, 4) + $occurrence->wordEnd - $occurrence->wordStart + 5);
+            $context = $this->marker->context($transcript, $occurrence);
             $rows[] = [
                 \sprintf('%.1f s', $occurrence->start),
                 $occurrence->type,
@@ -251,7 +256,7 @@ final class AccuracyCheckCommand extends Command
                     Verdict::NotFiller => 'not a Filler',
                     Verdict::Unjudged => 'unjudged',
                 },
-                implode(' ', array_map(static fn (Word $word): string => $word->punctuated, $context)),
+                trim(\sprintf('%s [%s] %s', $context['before'], $context['filler'], $context['after'])),
                 $occurrence->reason ?? '',
             ];
         }

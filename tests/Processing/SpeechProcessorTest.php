@@ -92,6 +92,7 @@ final class SpeechProcessorTest extends KernelTestCase
         $done = $this->reload($speech);
         self::assertSame([], $done->getFillers());
         self::assertSame(1, $this->coach->calls);
+        self::assertEquals(FakeCoachingGenerator::coaching(), $done->coaching(), 'the Coaching is saved');
         self::assertSame(SpeechStatus::Done, $done->getStatus());
     }
 

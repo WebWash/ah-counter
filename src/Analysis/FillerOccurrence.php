@@ -29,6 +29,14 @@ final readonly class FillerOccurrence
     }
 
     /**
+     * The same occurrence with the judge's decision on it.
+     */
+    public function withVerdict(Verdict $verdict, ?string $reason): self
+    {
+        return new self($this->type, $this->kind, $this->start, $this->end, $this->wordStart, $this->wordEnd, $verdict, $reason);
+    }
+
+    /**
      * Counted in the Report.
      */
     public function isFiller(): bool

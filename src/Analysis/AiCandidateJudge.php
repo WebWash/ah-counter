@@ -77,16 +77,9 @@ final readonly class AiCandidateJudge implements CandidateJudge
                 $this->logger->warning('The Candidate judge left {id} ("{type}" at {start} s) unjudged.', ['id' => $id, 'type' => $occurrence->type, 'start' => $occurrence->start]);
             }
 
-            $judged[] = null === $verdict ? $occurrence : new FillerOccurrence(
-                $occurrence->type,
-                $occurrence->kind,
-                $occurrence->start,
-                $occurrence->end,
-                $occurrence->wordStart,
-                $occurrence->wordEnd,
-                $verdict->isFiller ? Verdict::Filler : Verdict::NotFiller,
-                $verdict->reason,
-            );
+            $judged[] = null === $verdict
+                ? $occurrence
+                : $occurrence->withVerdict($verdict->isFiller ? Verdict::Filler : Verdict::NotFiller, $verdict->reason);
         }
 
         return $judged;

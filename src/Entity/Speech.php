@@ -163,9 +163,6 @@ class Speech
     }
 
     /**
-     * The stored Transcript, or null until transcribed.
-     */
-    /**
      * The stored Coaching, or null until the coaching step has run. Speeches processed before AI
      * Coaching existed (ticket 15) stored an empty placeholder, which also reads as null.
      */
@@ -174,6 +171,9 @@ class Speech
         return null === $this->coaching || [] === $this->coaching ? null : Coaching::fromArray($this->coaching);
     }
 
+    /**
+     * The stored Transcript, or null until transcribed.
+     */
     public function transcript(): ?Transcript
     {
         return null === $this->transcript ? null : Transcript::fromArray($this->transcript, (float) $this->durationSeconds);

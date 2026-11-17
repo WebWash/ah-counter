@@ -16,7 +16,6 @@ interface CoachingGenerator
     /**
      * @param list<FillerOccurrence> $fillers every Filler Sound and judged Candidate
      *
-     *
      * @throws \Throwable short-lived failures (rate limits, malformed output) are retried by Messenger
      */
     public function generate(Report $report, Transcript $transcript, array $fillers): Coaching;

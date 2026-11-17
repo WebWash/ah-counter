@@ -13,6 +13,7 @@ use App\Analysis\FillerDetector;
 use App\Analysis\FillerOccurrence;
 use App\Analysis\Verdict;
 use App\Command\AccuracyCheckCommand;
+use App\Report\TranscriptMarker;
 use App\Tests\Fake\FakeCandidateJudge;
 use App\Tests\Fake\FakeTranscriber;
 use App\Transcription\Transcript;
@@ -247,6 +248,7 @@ final class AccuracyCheckCommandTest extends TestCase
             new AccuracyRecordingLoader(),
             new FillerDetector(),
             $this->judge ?? $this->fakeJudge,
+            new TranscriptMarker(),
             new ServiceLocator(['deepgram' => static fn () => $fake]),
             $this->projectDir,
             new Filesystem(),
