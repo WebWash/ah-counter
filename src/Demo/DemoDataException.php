@@ -7,6 +7,6 @@ namespace App\Demo;
 /**
  * Demo data can't be exported or loaded; the message says why, for the console.
  */
-final class DemoDataException extends \RuntimeException
+class DemoDataException extends \RuntimeException
 {
 }

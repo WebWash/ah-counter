@@ -18,7 +18,7 @@ use Symfony\Component\Filesystem\Filesystem;
  */
 final readonly class DemoData
 {
-    public const string NAME_PATTERN = '/^[a-z0-9][a-z0-9-]{0,63}$/';
+    private const string NAME_PATTERN = '/^[a-z0-9][a-z0-9-]{0,63}$/';
 
     public function __construct(
         #[Autowire('%app.demo_dir%')]
@@ -35,12 +35,13 @@ final readonly class DemoData
      *
      * @return list<string> the files written
      *
+     * @throws InvalidDemoName
      * @throws DemoDataException
      */
     public function export(Speech $speech, string $name, bool $overwrite = false): array
     {
         if (!preg_match(self::NAME_PATTERN, $name)) {
-            throw new DemoDataException(\sprintf('"%s" is not a demo name: use lower-case letters, digits and hyphens, like "week-1".', $name));
+            throw new InvalidDemoName($name);
         }
         if (SpeechStatus::Done !== $speech->getStatus()) {
             throw new DemoDataException(\sprintf('Speech %s is still %s; only a done Speech can be a demo.', $speech->getId(), $speech->getStatus()->value));

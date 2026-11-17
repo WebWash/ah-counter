@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Coaching;
 
 use App\Ai\ClaudeClient;
+use App\Ai\MalformedAiOutput;
 use App\Report\Report;
 use Symfony\AI\Platform\Message\Message;
 use Symfony\AI\Platform\Message\MessageBag;
@@ -51,11 +52,7 @@ final readonly class AiPracticeExerciseGenerator implements PracticeExerciseGene
 
     public function generate(Report $report, ?string $focusFillerType = null): PracticeExercise
     {
-        $focus = null === $focusFillerType ? $report->topType : mb_strtolower(trim($focusFillerType));
-        $types = array_map(strval(...), array_keys($report->byType));
-        if (null !== $focus && !\in_array($focus, $types, true)) {
-            throw new FillerTypeNotInSpeech($focus, $types);
-        }
+        $focus = PracticeFocus::choose($report, $focusFillerType);
 
         $exercise = $this->claude->ask(
             $this->model,
@@ -67,11 +64,16 @@ final readonly class AiPracticeExerciseGenerator implements PracticeExerciseGene
             self::MAX_OUTPUT_TOKENS,
         );
 
+        $prompts = array_values(array_filter(array_map(trim(...), $exercise->prompts), static fn (string $prompt): bool => '' !== $prompt));
+        if (\count($prompts) < self::PROMPTS) {
+            throw new MalformedAiOutput(\sprintf('Anthropic (%s) answered with %d usable speaking prompt(s), not %d.', $this->model, \count($prompts), self::PROMPTS));
+        }
+
         return new PracticeExercise(
             trim($exercise->title),
             null === $focus ? [] : [$focus],
             trim($exercise->instructions),
-            \array_slice($exercise->prompts, 0, self::PROMPTS),
+            \array_slice($prompts, 0, self::PROMPTS),
             max(1, min($exercise->durationMinutes, self::MAX_MINUTES)),
         );
     }
@@ -88,7 +90,7 @@ final readonly class AiPracticeExerciseGenerator implements PracticeExerciseGene
 
         if (null === $focus) {
             $lines[] = '';
-            $lines[] = 'This Speech has no Fillers. Write a general fluency exercise that keeps it that way: practise deliberate pauses instead of fillers, for example between ideas and before key points. Leave focus empty.';
+            $lines[] = 'This Speech has no Fillers. Write a general fluency exercise that keeps it that way: practise deliberate pauses instead of Fillers, for example between ideas and before key points. Leave focus empty.';
 
             return implode("\n", $lines);
         }

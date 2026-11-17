@@ -6,6 +6,7 @@ namespace App\Command;
 
 use App\Demo\DemoData;
 use App\Demo\DemoDataException;
+use App\Demo\InvalidDemoName;
 use App\Repository\SpeechRepository;
 use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -35,12 +36,6 @@ final readonly class ExportDemoCommand
         #[Option('Replace demo files with the same name')]
         bool $force = false,
     ): int {
-        if (!preg_match(DemoData::NAME_PATTERN, $name)) {
-            $io->error(\sprintf('"%s" is not a demo name: use lower-case letters, digits and hyphens, like "week-1".', $name));
-
-            return Command::INVALID;
-        }
-
         $speech = Uuid::isValid($id) ? $this->speeches->find(Uuid::fromString($id)) : null;
         if (null === $speech) {
             $io->error(\sprintf('No Speech with ID %s.', $id));
@@ -53,7 +48,7 @@ final readonly class ExportDemoCommand
         } catch (DemoDataException $e) {
             $io->error($e->getMessage());
 
-            return Command::FAILURE;
+            return $e instanceof InvalidDemoName ? Command::INVALID : Command::FAILURE;
         }
 
         $io->success(\sprintf('Saved "%s" as demo data.', $speech->getDisplayTitle()));

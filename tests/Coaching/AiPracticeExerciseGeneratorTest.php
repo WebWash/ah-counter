@@ -93,8 +93,16 @@ final class AiPracticeExerciseGeneratorTest extends TestCase
         self::assertSame(['a', 'b', 'c'], $exercise->prompts);
         self::assertSame(AiPracticeExerciseGenerator::MAX_MINUTES, $exercise->durationMinutes);
 
-        $short = $this->generate(new ObjectResult(new PracticeExercise('Drill', ['um'], 'Speak.', ['a'], 0)));
+        $short = $this->generate(new ObjectResult(new PracticeExercise('Drill', ['um'], 'Speak.', ['a', 'b', 'c'], 0)));
         self::assertSame(1, $short->durationMinutes);
+    }
+
+    public function testFewerThanThreePromptsIsMalformed(): void
+    {
+        $this->expectException(MalformedAiOutput::class);
+        $this->expectExceptionMessage('1 usable speaking prompt(s), not 3');
+
+        $this->generate(new ObjectResult(new PracticeExercise('Drill', ['um'], 'Speak.', ['a', ' '], 5)));
     }
 
     public function testJsonFromTheModelIsDecodedIntoAPracticeExercise(): void

@@ -51,7 +51,7 @@ final readonly class SpeechTools
     ): array {
         $speeches = $this->speeches->recent(max(1, min($limit, self::MAX_LIMIT)));
 
-        return ['speeches' => array_map($this->summary(...), $speeches)];
+        return ['speeches' => array_map($this->listItem(...), $speeches)];
     }
 
     /**
@@ -155,7 +155,7 @@ final readonly class SpeechTools
     /**
      * @return array{id: string, title: string, createdAt: string, status: string, durationSeconds: float|null, fillerCount: int|null, fillersPerMinute: float|null}
      */
-    private function summary(Speech $speech): array
+    private function listItem(Speech $speech): array
     {
         $report = $this->reportBuilder->buildIfDone($speech);
 
