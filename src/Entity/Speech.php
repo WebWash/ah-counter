@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Analysis\FillerOccurrence;
 use App\Repository\SpeechRepository;
 use App\Speech\InvalidStatusTransition;
+use App\Transcription\Transcript;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
@@ -127,6 +129,45 @@ class Speech
 
         $this->changeStatus(SpeechStatus::Failed);
         $this->error = $error;
+    }
+
+    /**
+     * Saves the transcribing step's output. The Transcriber's duration replaces the browser's.
+     */
+    public function recordTranscript(Transcript $transcript): void
+    {
+        $this->transcript = $transcript->toArray();
+        $this->durationSeconds = $transcript->durationSeconds;
+        $this->updatedAt = now();
+    }
+
+    /**
+     * Saves the analysing step's output: every Filler Sound and Candidate with its final verdict.
+     *
+     * @param list<FillerOccurrence> $fillers
+     */
+    public function recordFillers(array $fillers): void
+    {
+        $this->fillers = array_map(static fn (FillerOccurrence $filler): array => $filler->toArray(), $fillers);
+        $this->updatedAt = now();
+    }
+
+    /**
+     * The stored Transcript, or null until transcribed.
+     */
+    public function transcript(): ?Transcript
+    {
+        return null === $this->transcript ? null : Transcript::fromArray($this->transcript, (float) $this->durationSeconds);
+    }
+
+    /**
+     * The stored Filler Sounds and Candidates, or null until analysed.
+     *
+     * @return list<FillerOccurrence>|null
+     */
+    public function fillerOccurrences(): ?array
+    {
+        return null === $this->fillers ? null : array_map(FillerOccurrence::fromArray(...), $this->fillers);
     }
 
     public function getId(): Uuid

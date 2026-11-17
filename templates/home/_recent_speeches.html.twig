@@ -15,8 +15,11 @@
                             <p class="mt-0.5 text-xs text-slate-500">{{ speech.createdAt|date('j M Y, H:i') }}</p>
                         </div>
                         {% if speech.status.value == 'done' %}
-                            {# Fillers per minute arrive with ReportBuilder (ticket 11). #}
-                            <p class="text-right text-xs text-slate-500"><span class="block font-mono text-sm text-slate-900">—</span>per min</p>
+                            {% set report = reports[speech.id.toRfc4122] ?? null %}
+                            <p class="text-right text-xs text-slate-500">
+                                <span class="block font-mono text-sm text-slate-900" {% if report %}data-fillers-per-minute{% endif %}>{{ report ? report.fillersPerMinuteRounded|number_format(1) : '—' }}</span>
+                                Fillers/min
+                            </p>
                         {% endif %}
                         {{ include('speech/_status_badge.html.twig', {status: speech.status}) }}
                     </a>

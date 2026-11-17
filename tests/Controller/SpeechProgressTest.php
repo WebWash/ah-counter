@@ -4,8 +4,12 @@ declare(strict_types=1);
 
 namespace App\Tests\Controller;
 
+use App\Analysis\FillerKind;
+use App\Analysis\FillerOccurrence;
+use App\Analysis\Verdict;
 use App\Entity\Speech;
 use App\Entity\SpeechStatus;
+use App\Transcription\Transcript;
 use App\Message\ProcessSpeech;
 use App\Tests\RecreatesDatabase;
 use Doctrine\ORM\EntityManagerInterface;
@@ -209,6 +213,26 @@ final class SpeechProgressTest extends WebTestCase
             $rows->each(static fn ($row) => trim($row->filter('[data-speech-status]')->text())),
         );
         self::assertSame('/speeches/'.$newest->getId(), $rows->first()->filter('a')->attr('href'));
+    }
+
+    public function testTheHomeListShowsFillersPerMinuteForADoneSpeech(): void
+    {
+        // 6 Fillers in 90 s = 4.0 per minute; the rejected Candidate doesn't count.
+        $fillers = array_fill(0, 6, new FillerOccurrence('um', FillerKind::Sound, 1.0, 1.2, 0, 0, Verdict::Filler));
+        $fillers[] = new FillerOccurrence('like', FillerKind::Phrase, 2.0, 2.2, 1, 1, Verdict::NotFiller, 'genuine');
+        self::mockTime('2026-11-17 10:00:00');
+        $this->createSpeech('Club speech', static function (Speech $s) use ($fillers): void {
+            $s->recordTranscript(new Transcript([], 90.0));
+            $s->recordFillers($fillers);
+            $s->markDone();
+        });
+        self::mockTime('2026-11-17 09:00:00');
+        $this->createSpeech('Still working', static fn (Speech $s) => $s->startStep(SpeechStatus::Analysing));
+
+        $crawler = $this->client->request('GET', '/');
+
+        $rows = $crawler->filter('[data-speech-list] li');
+        self::assertSame(['4.0', null], $rows->each(static fn ($row) => $row->filter('[data-fillers-per-minute]')->count() > 0 ? trim($row->filter('[data-fillers-per-minute]')->text()) : null));
     }
 
     public function testTheHomeListSaysSoWhenThereAreNoSpeeches(): void
