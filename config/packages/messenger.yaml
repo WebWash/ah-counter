@@ -13,4 +13,4 @@ framework:
             failed: '%env(MESSENGER_FAILED_TRANSPORT_DSN)%'
 
         routing:
-            # 'App\Message\ProcessSpeech': async
+            'App\Message\ProcessSpeech': async

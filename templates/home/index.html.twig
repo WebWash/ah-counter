@@ -8,8 +8,11 @@
         <p class="mt-4 text-lg text-slate-600">
             Record a short English speech and see every "um", "uh" and "you know" you said.
         </p>
-        <p class="mt-8 rounded-lg border border-dashed border-slate-300 p-6 text-sm text-slate-500">
+        <section class="mt-8 rounded-lg border border-dashed border-slate-300 p-6 text-sm text-slate-500"
+                 data-controller="recorder"
+                 data-recorder-upload-url-value="{{ path('speech_upload') }}"
+                 data-recorder-csrf-token-value="{{ csrf_token(constant('App\\Controller\\SpeechController::UPLOAD_TOKEN_ID')) }}">
             The recorder is coming soon.
-        </p>
+        </section>
     </main>
 {% endblock %}

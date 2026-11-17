@@ -1,0 +1,18 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ speech.displayTitle }} · Ah Counter{% endblock %}
+
+{% block body %}
+    <main class="mx-auto max-w-2xl px-4 py-12">
+        <a href="{{ path('app_home') }}" class="text-sm text-slate-500 hover:text-slate-800">&larr; All speeches</a>
+        <h1 class="mt-4 text-3xl font-bold tracking-tight text-slate-900">{{ speech.displayTitle }}</h1>
+        <p class="mt-2 text-slate-600">Status: {{ speech.status.label }}</p>
+
+        {% if speech.status.finished %}
+            <form method="post" action="{{ path('speech_delete', {id: speech.id}) }}" class="mt-8">
+                <input type="hidden" name="_token" value="{{ csrf_token(constant('App\\Controller\\SpeechController::DELETE_TOKEN_ID')) }}">
+                <button type="submit" class="text-sm text-red-700 hover:underline">Delete this Speech</button>
+            </form>
+        {% endif %}
+    </main>
+{% endblock %}
