@@ -1,0 +1,27 @@
+<section class="mt-12" aria-labelledby="recent-speeches">
+    <h2 id="recent-speeches" class="text-lg font-semibold text-slate-900">Your recent speeches</h2>
+
+    {% if speeches is empty %}
+        <p data-speech-list-empty class="mt-4 rounded-lg border border-dashed border-slate-300 p-6 text-center text-sm text-slate-500">
+            No speeches yet. Your recordings will appear here.
+        </p>
+    {% else %}
+        <ul data-speech-list class="mt-4 divide-y divide-slate-200 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            {% for speech in speeches %}
+                <li>
+                    <a href="{{ path('speech_show', {id: speech.id}) }}" class="flex items-center gap-4 px-4 py-3 hover:bg-slate-50 focus:bg-slate-50 focus:outline-none sm:px-5">
+                        <div class="min-w-0 flex-1">
+                            <p data-speech-title class="truncate font-medium text-slate-900">{{ speech.displayTitle }}</p>
+                            <p class="mt-0.5 text-xs text-slate-500">{{ speech.createdAt|date('j M Y, H:i') }}</p>
+                        </div>
+                        {% if speech.status.value == 'done' %}
+                            {# Fillers per minute arrive with ReportBuilder (ticket 11). #}
+                            <p class="text-right text-xs text-slate-500"><span class="block font-mono text-sm text-slate-900">—</span>per min</p>
+                        {% endif %}
+                        {{ include('speech/_status_badge.html.twig', {status: speech.status}) }}
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</section>

@@ -35,11 +35,21 @@ enum SpeechStatus: string
     }
 
     /**
+     * The processing steps, in order.
+     *
+     * @return list<self>
+     */
+    public static function steps(): array
+    {
+        return [self::Transcribing, self::Analysing, self::Coaching];
+    }
+
+    /**
      * The three statuses that name a processing step.
      */
     public function isStep(): bool
     {
-        return \in_array($this, [self::Transcribing, self::Analysing, self::Coaching], true);
+        return \in_array($this, self::steps(), true);
     }
 
     public function isFinished(): bool

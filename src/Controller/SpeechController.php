@@ -6,6 +6,7 @@ namespace App\Controller;
 
 use App\Dto\SpeechUpload;
 use App\Entity\Speech;
+use App\Entity\SpeechStatus;
 use App\Speech\RecordingStorage;
 use App\Speech\SpeechLifecycle;
 use App\Speech\SpeechStillProcessing;
@@ -26,6 +27,7 @@ final class SpeechController extends AbstractController
 {
     public const string UPLOAD_TOKEN_ID = 'speech-upload';
     public const string DELETE_TOKEN_ID = 'speech-delete';
+    public const string RETRY_TOKEN_ID = 'speech-retry';
 
     /**
      * Accepts a Recording from the recorder. Validation failures come back as 422 problem+json
@@ -60,7 +62,39 @@ final class SpeechController extends AbstractController
     #[Route('/{id}', name: 'speech_show', requirements: ['id' => Requirement::UUID_V4], methods: ['GET'])]
     public function show(Speech $speech): Response
     {
-        return $this->render('speech/show.html.twig', ['speech' => $speech]);
+        return $this->render('speech/show.html.twig', [
+            'speech' => $speech,
+            'steps' => SpeechStatus::steps(),
+        ]);
+    }
+
+    /**
+     * Polled by the speech-status controller every 2 s.
+     */
+    #[Route('/{id}/status', name: 'speech_status', requirements: ['id' => Requirement::UUID_V4], methods: ['GET'])]
+    public function status(Speech $speech): JsonResponse
+    {
+        $response = $this->json([
+            'status' => $speech->getStatus()->value,
+            'error' => $speech->getError(),
+        ]);
+        $response->headers->set('Cache-Control', 'no-store');
+
+        return $response;
+    }
+
+    #[Route('/{id}/retry', name: 'speech_retry', requirements: ['id' => Requirement::UUID_V4], methods: ['POST'])]
+    public function retry(Request $request, Speech $speech, SpeechLifecycle $lifecycle): Response
+    {
+        if (!$this->isCsrfTokenValid(self::RETRY_TOKEN_ID, $request->getPayload()->getString('_token'))) {
+            throw new AccessDeniedHttpException('Invalid CSRF token.');
+        }
+
+        if (!$lifecycle->retry($speech)) {
+            throw new ConflictHttpException('Only a failed Speech can be retried.');
+        }
+
+        return $this->redirectToRoute('speech_show', ['id' => $speech->getId()]);
     }
 
     /**

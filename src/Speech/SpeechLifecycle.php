@@ -6,18 +6,20 @@ namespace App\Speech;
 
 use App\Entity\Speech;
 use App\Message\ProcessSpeech;
+use App\Repository\SpeechRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Uid\Uuid;
 
 /**
- * Creating and deleting Speeches: the work behind the upload and delete endpoints.
+ * Creating, retrying and deleting Speeches: the work behind the upload, retry and delete endpoints.
  */
 final readonly class SpeechLifecycle
 {
     public function __construct(
         private EntityManagerInterface $entityManager,
+        private SpeechRepository $speechRepository,
         private RecordingStorage $recordingStorage,
         private MessageBusInterface $bus,
     ) {
@@ -48,6 +50,23 @@ final readonly class SpeechLifecycle
         $this->bus->dispatch(new ProcessSpeech($id->toRfc4122()));
 
         return $speech;
+    }
+
+    /**
+     * Sends a failed Speech back to pending and queues it again. The conditional update makes a
+     * double click harmless: only the request that changed the row dispatches (SPEC §5).
+     *
+     * @return bool false when the Speech was not failed (nothing dispatched)
+     */
+    public function retry(Speech $speech): bool
+    {
+        if (!$this->speechRepository->resetFailedForRetry($speech->getId())) {
+            return false;
+        }
+
+        $this->bus->dispatch(new ProcessSpeech($speech->getId()->toRfc4122()));
+
+        return true;
     }
 
     /**
