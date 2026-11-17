@@ -1,0 +1,9 @@
+{
+    "mcpServers": {
+        "ah-counter": {
+            "type": "stdio",
+            "command": "php",
+            "args": ["bin/console", "mcp:server"]
+        }
+    }
+}
