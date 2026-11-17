@@ -127,6 +127,8 @@ final class SpeechProgressTest extends WebTestCase
     {
         yield 'pending' => [static fn (Speech $s) => null];
         yield 'transcribing' => [static fn (Speech $s) => $s->startStep(SpeechStatus::Transcribing)];
+        yield 'analysing' => [static fn (Speech $s) => $s->startStep(SpeechStatus::Analysing)];
+        yield 'coaching' => [static fn (Speech $s) => $s->startStep(SpeechStatus::Coaching)];
         yield 'done' => [static fn (Speech $s) => $s->markDone()];
     }
 
@@ -172,6 +174,18 @@ final class SpeechProgressTest extends WebTestCase
         self::assertResponseIsSuccessful();
         self::assertSelectorNotExists('[data-controller="speech-status"]');
         self::assertCount(1, $crawler->filter(\sprintf('form[action="/speeches/%s/delete"]', $speech->getId())));
+    }
+
+    public function testThePageShowsAFractionalLengthAsMinutesAndSeconds(): void
+    {
+        $entityManager = self::getContainer()->get(EntityManagerInterface::class);
+        $speech = new Speech(Uuid::v4(), 'a.webm', 'audio/webm', 62.04, 'Club speech');
+        $entityManager->persist($speech);
+        $entityManager->flush();
+
+        $this->client->request('GET', '/speeches/'.$speech->getId());
+
+        self::assertSelectorTextContains('main', '· 1:02');
     }
 
     public function testTheHomeListShowsRecentSpeechesNewestFirst(): void

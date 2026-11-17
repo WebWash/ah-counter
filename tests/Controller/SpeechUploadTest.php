@@ -55,6 +55,16 @@ final class SpeechUploadTest extends WebTestCase
         self::assertSame($body['id'], $message->speechId);
     }
 
+    public function testATitleIsMeasuredAfterTrimming(): void
+    {
+        $title = str_repeat('a', 120);
+
+        $this->upload($this->recording('tone.webm', 'audio/webm'), ['clientDuration' => '30', 'title' => '  '.$title.'  ']);
+
+        self::assertResponseStatusCodeSame(201);
+        self::assertSame($title, self::getContainer()->get(SpeechRepository::class)->find($this->json()['id'])?->getTitle());
+    }
+
     public function testABlankTitleIsStoredAsNoTitle(): void
     {
         $this->upload($this->recording('tone.mp4', 'audio/mp4'), ['clientDuration' => '30', 'title' => '   ']);

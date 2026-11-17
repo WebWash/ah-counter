@@ -43,7 +43,7 @@ final readonly class SpeechUpload
         )]
         public ?float $clientDuration = null,
 
-        #[Assert\Length(max: Speech::TITLE_MAX_LENGTH, maxMessage: 'The title can be at most {{ limit }} characters long.')]
+        #[Assert\Length(max: Speech::TITLE_MAX_LENGTH, normalizer: 'trim', maxMessage: 'The title can be at most {{ limit }} characters long.')]
         public ?string $title = null,
 
         #[SerializedName('_token')]

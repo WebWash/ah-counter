@@ -25,6 +25,10 @@ export default class extends Controller {
     async poll() {
         try {
             const response = await fetch(this.urlValue, { headers: { Accept: 'application/json' }, cache: 'no-store' });
+            if (response.status === 404) {
+                window.location.reload();
+                return;
+            }
             if (response.ok) {
                 const { status } = await response.json();
                 if (status !== this.statusValue) {

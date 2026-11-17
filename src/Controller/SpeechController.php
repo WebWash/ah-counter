@@ -17,12 +17,12 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Requirement\Requirement;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
-#[Route('/speeches')]
+#[Route('/speeches', requirements: ['id' => Requirement::UUID_V4])]
 final class SpeechController extends AbstractController
 {
     public const string UPLOAD_TOKEN_ID = 'speech-upload';
@@ -59,7 +59,7 @@ final class SpeechController extends AbstractController
         ], Response::HTTP_CREATED);
     }
 
-    #[Route('/{id}', name: 'speech_show', requirements: ['id' => Requirement::UUID_V4], methods: ['GET'])]
+    #[Route('/{id}', name: 'speech_show', methods: ['GET'])]
     public function show(Speech $speech): Response
     {
         return $this->render('speech/show.html.twig', [
@@ -71,7 +71,7 @@ final class SpeechController extends AbstractController
     /**
      * Polled by the speech-status controller every 2 s.
      */
-    #[Route('/{id}/status', name: 'speech_status', requirements: ['id' => Requirement::UUID_V4], methods: ['GET'])]
+    #[Route('/{id}/status', name: 'speech_status', methods: ['GET'])]
     public function status(Speech $speech): JsonResponse
     {
         $response = $this->json([
@@ -83,12 +83,10 @@ final class SpeechController extends AbstractController
         return $response;
     }
 
-    #[Route('/{id}/retry', name: 'speech_retry', requirements: ['id' => Requirement::UUID_V4], methods: ['POST'])]
+    #[Route('/{id}/retry', name: 'speech_retry', methods: ['POST'])]
     public function retry(Request $request, Speech $speech, SpeechLifecycle $lifecycle): Response
     {
-        if (!$this->isCsrfTokenValid(self::RETRY_TOKEN_ID, $request->getPayload()->getString('_token'))) {
-            throw new AccessDeniedHttpException('Invalid CSRF token.');
-        }
+        $this->denyUnlessCsrfTokenValid(self::RETRY_TOKEN_ID, $request);
 
         if (!$lifecycle->retry($speech)) {
             throw new ConflictHttpException('Only a failed Speech can be retried.');
@@ -100,7 +98,7 @@ final class SpeechController extends AbstractController
     /**
      * Streams the Recording with its stored type. BinaryFileResponse answers Range requests (206).
      */
-    #[Route('/{id}/recording', name: 'speech_recording', requirements: ['id' => Requirement::UUID_V4], methods: ['GET'])]
+    #[Route('/{id}/recording', name: 'speech_recording', methods: ['GET'])]
     public function recording(Speech $speech, RecordingStorage $recordingStorage): BinaryFileResponse
     {
         $response = new BinaryFileResponse($recordingStorage->path($speech), headers: [
@@ -111,12 +109,10 @@ final class SpeechController extends AbstractController
         return $response;
     }
 
-    #[Route('/{id}/delete', name: 'speech_delete', requirements: ['id' => Requirement::UUID_V4], methods: ['POST'])]
+    #[Route('/{id}/delete', name: 'speech_delete', methods: ['POST'])]
     public function delete(Request $request, Speech $speech, SpeechLifecycle $lifecycle): Response
     {
-        if (!$this->isCsrfTokenValid(self::DELETE_TOKEN_ID, $request->getPayload()->getString('_token'))) {
-            throw new AccessDeniedHttpException('Invalid CSRF token.');
-        }
+        $this->denyUnlessCsrfTokenValid(self::DELETE_TOKEN_ID, $request);
 
         try {
             $lifecycle->delete($speech);
@@ -125,6 +121,17 @@ final class SpeechController extends AbstractController
         }
 
         return $this->redirectToRoute('app_home');
+    }
+
+    /**
+     * A plain 403: #[IsCsrfTokenValid] would go through the firewall and answer 401, which is
+     * misleading in an app without logins.
+     */
+    private function denyUnlessCsrfTokenValid(string $tokenId, Request $request): void
+    {
+        if (!$this->isCsrfTokenValid($tokenId, $request->getPayload()->getString('_token'))) {
+            throw new AccessDeniedHttpException('Invalid CSRF token.');
+        }
     }
 
     private function uploadRejected(string $message): JsonResponse
