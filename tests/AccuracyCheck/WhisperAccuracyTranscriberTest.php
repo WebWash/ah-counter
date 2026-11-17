@@ -6,6 +6,7 @@ namespace App\Tests\AccuracyCheck;
 
 use App\AccuracyCheck\AccuracyRecording;
 use App\AccuracyCheck\WhisperAccuracyTranscriber;
+use App\Transcription\Word;
 use PHPUnit\Framework\TestCase;
 use Symfony\AI\Platform\Bridge\OpenAi\Factory;
 use Symfony\AI\Platform\StructuredOutput\PlatformSubscriber;
@@ -49,8 +50,10 @@ final class WhisperAccuracyTranscriberTest extends TestCase
     {
         $transcription = $this->transcriber(new JsonMockResponse(self::VERBOSE_RESPONSE))->transcribe($this->recording());
 
-        self::assertSame(['Um', 'so', 'I', 'er', 'think'], $transcription->words);
-        self::assertSame('Um, so I, er, think.', $transcription->text);
+        self::assertSame(['um', 'so', 'i', 'er', 'think'], array_map(static fn (Word $word): string => $word->text, $transcription->transcript->words));
+        self::assertSame(['Um', 'so', 'I', 'er', 'think'], array_map(static fn (Word $word): string => $word->punctuated, $transcription->transcript->words));
+        self::assertSame(1.0, $transcription->transcript->words[3]->start);
+        self::assertSame(3.2, $transcription->transcript->durationSeconds);
         self::assertSame(self::VERBOSE_RESPONSE, $transcription->response);
 
         self::assertMatchesRegularExpression('/name="model"\s+whisper-1/', $this->sentBody);

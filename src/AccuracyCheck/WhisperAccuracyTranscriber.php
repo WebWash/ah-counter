@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\AccuracyCheck;
 
+use App\Transcription\Transcript;
+use App\Transcription\Word;
 use Symfony\AI\Platform\Message\Content\Audio;
 use Symfony\AI\Platform\PlatformInterface;
 use Symfony\Component\DependencyInjection\Attribute\AsTaggedItem;
@@ -47,10 +49,12 @@ final readonly class WhisperAccuracyTranscriber implements AccuracyTranscriber
         }
         $data = $response->toArray();
 
-        return new RawTranscription(
-            array_map(static fn (array $word): string => (string) $word['word'], $data['words'] ?? []),
-            (string) ($data['text'] ?? ''),
-            $data,
+        // Whisper's word list carries no punctuation or confidence; the words are all we need.
+        $words = array_map(
+            static fn (array $word): Word => new Word(Word::normaliseText((string) $word['word']), (string) $word['word'], (float) $word['start'], (float) $word['end'], 1.0),
+            $data['words'] ?? [],
         );
+
+        return new RawTranscription(new Transcript($words, (float) ($data['duration'] ?? 0.0)), $data);
     }
 }

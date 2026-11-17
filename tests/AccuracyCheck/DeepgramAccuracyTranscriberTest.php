@@ -9,6 +9,7 @@ use App\AccuracyCheck\DeepgramAccuracyTranscriber;
 use App\Processing\PermanentFailure;
 use App\Transcription\DeepgramResponseNormaliser;
 use App\Transcription\DeepgramTranscriber;
+use App\Transcription\Word;
 use PHPUnit\Framework\TestCase;
 use Symfony\AI\Platform\Bridge\Deepgram\Factory;
 use Symfony\Component\HttpClient\MockHttpClient;
@@ -51,8 +52,8 @@ final class DeepgramAccuracyTranscriberTest extends TestCase
     {
         $transcription = $this->transcriber(new JsonMockResponse(self::LISTEN_RESPONSE))->transcribe($this->recording());
 
-        self::assertSame(['um', 'so', 'i', 'uh', 'think'], $transcription->words);
-        self::assertSame('Um, so I uh think.', $transcription->text, 'the punctuated words, joined');
+        self::assertSame(['um', 'so', 'i', 'uh', 'think'], array_map(static fn (Word $word): string => $word->text, $transcription->transcript->words));
+        self::assertSame('Um, so I uh think.', $transcription->transcript->text(), 'the punctuated words, joined');
         self::assertSame(self::LISTEN_RESPONSE, $transcription->response);
 
         $listen = $this->listenRequest();

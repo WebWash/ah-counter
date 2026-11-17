@@ -7,7 +7,13 @@ namespace App\Command;
 use App\AccuracyCheck\AccuracyRecording;
 use App\AccuracyCheck\AccuracyTranscriber;
 use App\AccuracyCheck\AccuracyRecordingLoader;
-use App\AccuracyCheck\FillerSoundCounter;
+use App\Analysis\CandidateJudge;
+use App\Analysis\FillerDetector;
+use App\Analysis\FillerKind;
+use App\Analysis\FillerOccurrence;
+use App\Analysis\Lexicon;
+use App\Analysis\Verdict;
+use App\Transcription\Word;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
@@ -19,14 +25,14 @@ use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Contracts\Service\ServiceProviderInterface;
 
 /**
- * Runs the Recordings in tests/accuracy/ through a real transcription provider and
- * compares the Filler Sounds it keeps with their hand count, if any (SPEC §10, ticket 04).
+ * Runs the Recordings in tests/accuracy/ through a real transcription provider and the app's
+ * FillerDetector, optionally the Candidate judge too, and compares the Fillers found with their
+ * hand count, if any (SPEC §10, tickets 04 and 14).
  *
  * Deepgram goes through the app's DeepgramTranscriber (ticket 09); Whisper is called directly.
- * Filler Sounds are counted in the transcribed words. Ticket 14 swaps in FillerDetector and,
- * optionally, the Candidate judge.
+ * Without --judge, Filler Phrases show only how many Candidates were found.
  */
-#[AsCommand(name: 'app:accuracy-check', description: 'Compare a transcriber\'s Filler Sounds with the Recordings and hand counts in tests/accuracy/ (real API calls)')]
+#[AsCommand(name: 'app:accuracy-check', description: 'Compare the Fillers found in tests/accuracy/ Recordings with their hand counts (real API calls)')]
 final class AccuracyCheckCommand extends Command
 {
     private const string RECORDING_DIR = 'tests/accuracy';
@@ -37,7 +43,8 @@ final class AccuracyCheckCommand extends Command
      */
     public function __construct(
         private readonly AccuracyRecordingLoader $recordingLoader,
-        private readonly FillerSoundCounter $counter,
+        private readonly FillerDetector $detector,
+        private readonly CandidateJudge $judge,
         #[AutowireLocator(AccuracyTranscriber::TAG)]
         private readonly ServiceProviderInterface $transcribers,
         #[Autowire('%kernel.project_dir%')]
@@ -55,6 +62,8 @@ final class AccuracyCheckCommand extends Command
         bool $smartFormat = false,
         #[Option(description: 'Deepgram only: save each raw response to tests/Fixtures/deepgram/<name>.json')]
         bool $saveFixtures = false,
+        #[Option(description: 'Also judge the Filler Phrase Candidates with the AI judge (AI_JUDGE_MODEL)')]
+        bool $judge = false,
     ): int {
         if (!$this->transcribers->has($provider)) {
             $io->error(\sprintf('Unknown provider "%s". Available: %s.', $provider, implode(', ', array_keys($this->transcribers->getProvidedServices()))));
@@ -91,7 +100,7 @@ final class AccuracyCheckCommand extends Command
 
         $transcriber = $this->transcribers->get($provider);
         $providerOptions = $smartFormat ? ['smart_format' => 'true'] : [];
-        $io->title(\sprintf('Accuracy check: %s%s, %d Recording(s)', $provider, $smartFormat ? ' (smart_format)' : '', \count($recordings)));
+        $io->title(\sprintf('Accuracy check: %s%s%s, %d Recording(s)', $provider, $smartFormat ? ' (smart_format)' : '', $judge ? ' + Candidate judge' : '', \count($recordings)));
 
         $ok = true;
         foreach ($recordings as $recording) {
@@ -109,54 +118,147 @@ final class AccuracyCheckCommand extends Command
                 continue;
             }
 
-            if ($io->isVerbose()) {
-                $io->text('Transcript: '.$transcription->text);
-            }
-
-            $io->table(['Filler Type', 'Expected', 'Detected', 'Diff'], $this->rows($recording, $this->counter->count($transcription->words)));
-
             if ($saveFixtures) {
                 $this->saveFixture($io, $recording, $transcription->response);
             }
+
+            if ($io->isVerbose()) {
+                $io->text('Transcript: '.$transcription->transcript->text());
+            }
+
+            $occurrences = $this->detector->detect($transcription->transcript);
+            if ($judge) {
+                try {
+                    $occurrences = $this->judge->judge($transcription->transcript, $occurrences);
+                } catch (\Throwable $e) {
+                    $io->error(\sprintf('The Candidate judge failed for %s: %s', $recording->name, $e->getMessage()));
+                    if ($io->isDebug()) {
+                        $io->writeln((string) $e);
+                    }
+                    $ok = false;
+
+                    continue;
+                }
+
+                if ($io->isVerbose()) {
+                    $this->printVerdicts($io, $transcription->transcript->words, $occurrences);
+                }
+            }
+
+            $io->table(['Filler Type', 'Expected', 'Detected', 'Diff', 'Candidates'], $this->rows($recording, $occurrences, $judge));
         }
 
         return $ok ? Command::SUCCESS : Command::FAILURE;
     }
 
     /**
-     * @param array<string, int> $detected
+     * One row per Filler Type that was found or hand-counted, then the totals. Filler Phrases count
+     * as detected only once judged; their Candidates column shows how many the detector found.
+     *
+     * @param list<FillerOccurrence> $occurrences
      *
      * @return list<list<string|int>|TableSeparator>
      */
-    private function rows(AccuracyRecording $recording, array $detected): array
+    private function rows(AccuracyRecording $recording, array $occurrences, bool $judged): array
     {
-        $handCount = $recording->expected;
-        $rows = [];
-        $expectedTotal = 0;
-        $detectedTotal = 0;
+        $sounds = array_values(array_filter($occurrences, static fn (FillerOccurrence $o): bool => FillerKind::Sound === $o->kind));
+        $phrases = array_values(array_filter($occurrences, static fn (FillerOccurrence $o): bool => FillerKind::Phrase === $o->kind));
 
-        foreach ($this->counter->fillerSoundTypes() as $type) {
-            $expected = $handCount[$type] ?? 0;
-            $found = $detected[$type] ?? 0;
-            if (0 === $found && !isset($handCount[$type])) {
-                continue;
-            }
-            $rows[] = null === $handCount ? [$type, '?', $found, ''] : [$type, $expected, $found, $this->diff($found - $expected)];
-            $expectedTotal += $expected;
-            $detectedTotal += $found;
+        [$soundRows, $soundTotal] = $this->group('All Filler Sounds', array_keys(Lexicon::FILLER_SOUNDS), $sounds, $recording->expected, true);
+        [$phraseRows, $phraseTotal] = $this->group('All Filler Phrases', Lexicon::FILLER_PHRASES, $phrases, $recording->expected, $judged);
+
+        // Hand-counted types the lexicon doesn't know, so they can never be detected.
+        $unknown = [];
+        foreach (array_diff_key($recording->expected ?? [], array_flip([...array_keys(Lexicon::FILLER_SOUNDS), ...Lexicon::FILLER_PHRASES])) as $type => $expected) {
+            $unknown[] = $this->row((string) $type, $expected, null, '');
         }
 
-        // Filler Phrases need context, which only FillerDetector and the judge provide (tickets 10, 14).
-        foreach (array_diff_key($handCount ?? [], array_flip($this->counter->fillerSoundTypes())) as $type => $expected) {
-            $rows[] = [$type, $expected, 'n/a', ''];
+        $rows = [...$soundRows, ...$phraseRows, ...$unknown, new TableSeparator(), $soundTotal[0], $phraseTotal[0]];
+        if ($judged) {
+            $expected = null === $recording->expected ? null : $soundTotal[1] + $phraseTotal[1];
+            $rows[] = $this->row('All Fillers', $expected, $soundTotal[2] + $phraseTotal[2], '');
         }
-
-        $rows[] = new TableSeparator();
-        $rows[] = null === $handCount
-            ? ['All Filler Sounds', '?', $detectedTotal, '']
-            : ['All Filler Sounds', $expectedTotal, $detectedTotal, $this->diff($detectedTotal - $expectedTotal)];
 
         return $rows;
+    }
+
+    /**
+     * The rows of one kind (Filler Sounds or Filler Phrases) and their total.
+     *
+     * @param list<string>            $types       the kind's Filler Types, in lexicon order
+     * @param list<FillerOccurrence>  $occurrences this kind only
+     * @param array<string, int>|null $handCount
+     * @param bool                    $counted     false for unjudged Candidates: detected shows n/a
+     *
+     * @return array{list<list<string|int>>, array{list<string|int>, int, int}} rows, then [total row, expected, detected]
+     */
+    private function group(string $label, array $types, array $occurrences, ?array $handCount, bool $counted): array
+    {
+        $isSound = 'All Filler Sounds' === $label;
+        $rows = [];
+        $expectedTotal = 0;
+        $foundTotal = 0;
+        $candidateTotal = 0;
+
+        foreach ($types as $type) {
+            $ofType = array_filter($occurrences, static fn (FillerOccurrence $o): bool => $o->type === $type);
+            $found = \count(array_filter($ofType, static fn (FillerOccurrence $o): bool => $o->isFiller()));
+            if ([] === $ofType && !isset($handCount[$type])) {
+                continue;
+            }
+            $expected = $handCount[$type] ?? 0;
+            $rows[] = $this->row($type, null === $handCount ? null : $expected, $counted ? $found : null, $isSound ? '' : \count($ofType));
+            $expectedTotal += $expected;
+            $foundTotal += $found;
+            $candidateTotal += \count($ofType);
+        }
+
+        $total = $this->row($label, null === $handCount ? null : $expectedTotal, $counted ? $foundTotal : null, $isSound ? '' : $candidateTotal);
+
+        return [$rows, [$total, $expectedTotal, $foundTotal]];
+    }
+
+    /**
+     * @param int|null $expected null when the Recording has no hand count
+     * @param int|null $detected null when this check doesn't count the type (unjudged Candidates)
+     *
+     * @return list<string|int>
+     */
+    private function row(string $label, ?int $expected, ?int $detected, int|string $candidates): array
+    {
+        $diff = null === $expected || null === $detected ? '' : $this->diff($detected - $expected);
+
+        return [$label, $expected ?? '?', $detected ?? 'n/a', $diff, $candidates];
+    }
+
+    /**
+     * @param list<Word> $words
+     * @param list<FillerOccurrence>         $occurrences
+     */
+    private function printVerdicts(SymfonyStyle $io, array $words, array $occurrences): void
+    {
+        $rows = [];
+        foreach ($occurrences as $occurrence) {
+            if (FillerKind::Phrase !== $occurrence->kind) {
+                continue;
+            }
+            $context = \array_slice($words, max(0, $occurrence->wordStart - 4), min($occurrence->wordStart, 4) + $occurrence->wordEnd - $occurrence->wordStart + 5);
+            $rows[] = [
+                \sprintf('%.1f s', $occurrence->start),
+                $occurrence->type,
+                match ($occurrence->verdict) {
+                    Verdict::Filler => 'Filler',
+                    Verdict::NotFiller => 'not a Filler',
+                    Verdict::Unjudged => 'unjudged',
+                },
+                implode(' ', array_map(static fn (Word $word): string => $word->punctuated, $context)),
+                $occurrence->reason ?? '',
+            ];
+        }
+
+        if ([] !== $rows) {
+            $io->table(['Time', 'Candidate', 'Verdict', 'Context', 'Reason'], $rows);
+        }
     }
 
     private function diff(int $diff): string

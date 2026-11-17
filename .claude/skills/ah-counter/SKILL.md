@@ -27,6 +27,7 @@ Vocabulary: use the terms in `GLOSSARY.md` exactly (**Speech**, **Recording**, *
 ## Symfony AI
 
 - Every LLM call uses structured output: `response_format => SomeDto::class`, read through `asObject()`. DTOs are `readonly` with typed (and docblock-typed list) properties.
+- Call Anthropic through `App\Ai\ClaudeClient::ask()`. It sorts failures into permanent and short-lived, and it makes you pass an output token budget: the bridge's default of 1000 truncates answers once the model's thinking is counted.
 - Model names come from config (`AI_JUDGE_MODEL`, `AI_COACH_MODEL`, `DEEPGRAM_MODEL`), injected with `#[Autowire]`.
 - Deepgram: build `new Audio(fn () => file_get_contents($path), $mimeType, $path)` with the stored MIME type. Call `$deferred->getResult()` first so HTTP errors surface, then read the words and duration from `getRawResult()->getData()`. The plain-text result loses every timestamp (ADR 0001).
 - The Symfony AI packages are pinned betas. Confirm a class, option or config key in `vendor/` before you rely on it.

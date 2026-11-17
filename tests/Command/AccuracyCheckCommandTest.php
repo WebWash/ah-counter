@@ -7,9 +7,15 @@ namespace App\Tests\Command;
 use App\AccuracyCheck\AccuracyRecording;
 use App\AccuracyCheck\AccuracyTranscriber;
 use App\AccuracyCheck\AccuracyRecordingLoader;
-use App\AccuracyCheck\FillerSoundCounter;
 use App\AccuracyCheck\RawTranscription;
+use App\Analysis\CandidateJudge;
+use App\Analysis\FillerDetector;
+use App\Analysis\FillerOccurrence;
+use App\Analysis\Verdict;
 use App\Command\AccuracyCheckCommand;
+use App\Tests\Fake\FakeCandidateJudge;
+use App\Tests\Fake\FakeTranscriber;
+use App\Transcription\Transcript;
 use PHPUnit\Framework\TestCase;
 use Symfony\AI\Platform\Exception\AuthenticationException;
 use Symfony\Component\Console\Command\Command;
@@ -24,10 +30,15 @@ final class AccuracyCheckCommandTest extends TestCase
     /** @var list<array{recording: string, options: array<string, string>}> */
     private array $calls = [];
 
+    private FakeCandidateJudge $fakeJudge;
+
+    private ?CandidateJudge $judge = null;
+
     protected function setUp(): void
     {
         $this->projectDir = sys_get_temp_dir().'/ah-counter-accuracy-'.bin2hex(random_bytes(4));
         mkdir($this->projectDir.'/tests/accuracy', recursive: true);
+        $this->fakeJudge = new FakeCandidateJudge();
     }
 
     protected function tearDown(): void
@@ -54,7 +65,8 @@ final class AccuracyCheckCommandTest extends TestCase
         self::assertMatchesRegularExpression('/\bum\s+4\s+2\s+-2\b/', $display);
         self::assertMatchesRegularExpression('/\buh\s+2\s+3\s+\+1\b/', $display);
         self::assertMatchesRegularExpression('/\bhmm\s+0\s+1\s+\+1\b/', $display);
-        self::assertMatchesRegularExpression('/\blike\s+3\s+n\/a\b/', $display, 'Filler Phrases are not counted by this check');
+        self::assertMatchesRegularExpression('/\blike\s+3\s+n\/a\s+1\s*$/m', $display, 'without --judge, Filler Phrases show only their Candidate count');
+        self::assertMatchesRegularExpression('/\bso\s+0\s+n\/a\s+1\s*$/m', $display);
         self::assertMatchesRegularExpression('/All Filler Sounds\s+6\s+6\s+0\b/', $display);
         self::assertMatchesRegularExpression('/All Filler Sounds\s+0\s+0\s+0\b/', $display);
     }
@@ -70,6 +82,58 @@ final class AccuracyCheckCommandTest extends TestCase
         self::assertSame(Command::SUCCESS, $exit, $display);
         self::assertMatchesRegularExpression('/\bum\s+\?\s+2\s*$/m', $display);
         self::assertMatchesRegularExpression('/All Filler Sounds\s+\?\s+3\s*$/m', $display);
+    }
+
+    public function testWithJudgeTheJudgedFillerPhrasesAreComparedWithTheHandCount(): void
+    {
+        $this->recording('clip-1', ['um' => 1, 'like' => 2, 'you know' => 1]);
+        $this->judge = new class implements CandidateJudge {
+            public function judge(Transcript $transcript, array $occurrences): array
+            {
+                // Every "like" is a Filler, everything else a genuine use.
+                return array_map(static fn (FillerOccurrence $o): FillerOccurrence => Verdict::Unjudged === $o->verdict
+                    ? new FillerOccurrence($o->type, $o->kind, $o->start, $o->end, $o->wordStart, $o->wordEnd, 'like' === $o->type ? Verdict::Filler : Verdict::NotFiller, 'Because '.$o->type.'.')
+                    : $o, $occurrences);
+            }
+        };
+
+        $tester = $this->tester(['clip-1' => ['So,', 'um,', 'it', 'was,', 'like,', 'huge,', 'like', 'a', 'dream,', 'you', 'know.']]);
+        $exit = $tester->execute(['--provider' => 'deepgram', '--judge' => true], ['verbosity' => \Symfony\Component\Console\Output\OutputInterface::VERBOSITY_VERBOSE]);
+
+        $display = $tester->getDisplay();
+        self::assertSame(Command::SUCCESS, $exit, $display);
+        self::assertMatchesRegularExpression('/\blike\s+2\s+2\s+0\s+2\s*$/m', $display);
+        self::assertMatchesRegularExpression('/\byou know\s+1\s+0\s+-1\s+1\s*$/m', $display);
+        self::assertMatchesRegularExpression('/\bso\s+0\s+0\s+0\s+1\s*$/m', $display);
+        self::assertMatchesRegularExpression('/All Filler Phrases\s+3\s+2\s+-1\s+4\s*$/m', $display);
+        self::assertMatchesRegularExpression('/All Fillers\s+4\s+3\s+-1\b/', $display);
+        self::assertStringContainsString('Because you know.', $display, '-v lists each verdict with its reason');
+    }
+
+    public function testWithoutJudgeTheJudgeIsNeverCalled(): void
+    {
+        $this->recording('clip-1', ['like' => 1]);
+
+        $tester = $this->tester(['clip-1' => ['It', 'was,', 'like,', 'huge.']]);
+        $tester->execute(['--provider' => 'deepgram']);
+
+        self::assertSame(0, $this->fakeJudge->calls);
+        self::assertStringNotContainsString('All Fillers', $tester->getDisplay());
+    }
+
+    public function testAJudgeFailureIsReportedAndTheOtherRecordingsCarryOn(): void
+    {
+        $this->recording('clip-1', ['like' => 1]);
+        $this->recording('clip-2', ['like' => 1]);
+        $this->fakeJudge->failNextCallWith(new \RuntimeException('Anthropic is overloaded.'));
+
+        $tester = $this->tester(['clip-1' => ['It', 'was,', 'like,', 'huge.'], 'clip-2' => ['It', 'was,', 'like,', 'huge.']]);
+        $exit = $tester->execute(['--provider' => 'deepgram', '--judge' => true]);
+
+        $display = $tester->getDisplay();
+        self::assertSame(Command::FAILURE, $exit);
+        self::assertStringContainsString('Anthropic is overloaded.', $display);
+        self::assertMatchesRegularExpression('/All Filler Phrases\s+1\s+1\s+0\s+1\s*$/m', $display, 'clip-2 is still judged (the fake judges every Candidate a Filler)');
     }
 
     public function testPassesSmartFormatToTheProvider(): void
@@ -175,13 +239,14 @@ final class AccuracyCheckCommandTest extends TestCase
                 }
                 $words = $this->wordsByRecording[$recording->name];
 
-                return new RawTranscription($words, implode(' ', $words), ['provider' => 'deepgram', 'recording' => $recording->name]);
+                return new RawTranscription(FakeTranscriber::transcript($words, 10.0), ['provider' => 'deepgram', 'recording' => $recording->name]);
             }
         };
 
         return new CommandTester(new AccuracyCheckCommand(
             new AccuracyRecordingLoader(),
-            new FillerSoundCounter(),
+            new FillerDetector(),
+            $this->judge ?? $this->fakeJudge,
             new ServiceLocator(['deepgram' => static fn () => $fake]),
             $this->projectDir,
             new Filesystem(),
