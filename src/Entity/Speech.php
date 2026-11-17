@@ -153,6 +153,17 @@ class Speech
     }
 
     /**
+     * Saves the coaching step's output.
+     *
+     * @param array<string, mixed> $coaching
+     */
+    public function recordCoaching(array $coaching): void
+    {
+        $this->coaching = $coaching;
+        $this->updatedAt = now();
+    }
+
+    /**
      * The stored Transcript, or null until transcribed.
      */
     public function transcript(): ?Transcript
