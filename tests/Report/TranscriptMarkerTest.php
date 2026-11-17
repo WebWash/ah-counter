@@ -49,6 +49,29 @@ final class TranscriptMarkerTest extends TestCase
         );
     }
 
+    public function testBracketsEachCountedFillerInThePunctuatedText(): void
+    {
+        $transcript = FakeTranscriber::transcript(['So', 'I', 'um,', 'think', 'it', 'was', 'like', 'huge,', 'you', 'know.', 'Uh'], 12.0);
+        $occurrences = [
+            new FillerOccurrence('so', FillerKind::Phrase, 0.0, 0.5, 0, 0, Verdict::Unjudged),
+            new FillerOccurrence('um', FillerKind::Sound, 2.0, 2.5, 2, 2, Verdict::Filler),
+            new FillerOccurrence('like', FillerKind::Phrase, 6.0, 6.5, 6, 6, Verdict::Filler),
+            new FillerOccurrence('you know', FillerKind::Phrase, 8.0, 9.5, 8, 9, Verdict::Filler),
+            new FillerOccurrence('uh', FillerKind::Sound, 10.0, 10.5, 10, 10, Verdict::Filler),
+        ];
+
+        self::assertSame(
+            'So I [um], think it was [like] huge, [you know]. [Uh]',
+            (new TranscriptMarker())->bracketed($transcript, $occurrences),
+            'punctuation stays outside the brackets; Candidates that do not count are left plain',
+        );
+    }
+
+    public function testBracketingAnEmptyTranscriptGivesAnEmptyString(): void
+    {
+        self::assertSame('', (new TranscriptMarker())->bracketed(FakeTranscriber::transcript([], 12.0), []));
+    }
+
     public function testContextStopsAtTheEdgesOfTheTranscript(): void
     {
         $transcript = FakeTranscriber::transcript(['Well,', 'I', 'mean', 'it.'], 12.0);

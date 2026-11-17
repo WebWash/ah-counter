@@ -44,6 +44,43 @@ final class TranscriptMarker
     }
 
     /**
+     * The punctuated Transcript with each counted Filler in [brackets], punctuation kept outside:
+     * "So I [um], think it was [like] huge." Candidates that don't count stay plain (SPEC §8).
+     *
+     * @param list<FillerOccurrence> $occurrences in time order, never overlapping
+     */
+    public function bracketed(Transcript $transcript, array $occurrences): string
+    {
+        $parts = [];
+        foreach ($this->segments($transcript, $occurrences) as $segment) {
+            $text = $this->join(array_values($segment->words));
+            $parts[] = true === $segment->occurrence?->isFiller() ? $this->bracket($text) : $text;
+        }
+
+        return implode(' ', $parts);
+    }
+
+    /**
+     * context() as one line with the Filler in [brackets]: "… think it was [like] huge and you …".
+     */
+    public function contextText(Transcript $transcript, FillerOccurrence $occurrence, int $around = 4): string
+    {
+        $context = $this->context($transcript, $occurrence, $around);
+
+        return trim($context['before'].' '.$this->bracket($context['filler']).' '.$context['after']);
+    }
+
+    /**
+     * "um," → "[um],": the brackets go round the words, not the punctuation.
+     */
+    private function bracket(string $text): string
+    {
+        preg_match('/^([^\p{L}\p{N}]*)(.*?)([^\p{L}\p{N}]*)$/us', $text, $match);
+
+        return $match[1].'['.$match[2].']'.$match[3];
+    }
+
+    /**
      * The Filler's words with up to $around words either side, punctuated as spoken. An ellipsis
      * marks where the Transcript goes on.
      *
