@@ -65,7 +65,8 @@ final class SpeechProcessorTest extends KernelTestCase
         self::assertSame(20.0, $done->getDurationSeconds(), 'the Transcriber\'s duration replaces the browser\'s');
         self::assertCount(8, $done->getTranscript() ?? []);
         self::assertSame(['so', 'um', 'like'], array_column($done->getFillers() ?? [], 'type'));
-        self::assertSame(FakeCoachingGenerator::COACHING, $done->getCoaching());
+        self::assertSame(FakeCoachingGenerator::coaching()->toArray(), $done->getCoaching());
+        self::assertEquals(FakeCoachingGenerator::coaching(), $done->coaching());
         self::assertSame(3, $this->coach->lastReport?->totalFillers, 'Coaching gets the Report built from the saved Fillers');
         self::assertSame([1, 1, 1], [$this->transcriber->calls, $this->judge->calls, $this->coach->calls]);
     }

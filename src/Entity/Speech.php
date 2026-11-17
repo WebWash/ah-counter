@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use App\Analysis\FillerOccurrence;
+use App\Coaching\Coaching;
 use App\Repository\SpeechRepository;
 use App\Speech\InvalidStatusTransition;
 use App\Transcription\Transcript;
@@ -154,18 +155,25 @@ class Speech
 
     /**
      * Saves the coaching step's output.
-     *
-     * @param array<string, mixed> $coaching
      */
-    public function recordCoaching(array $coaching): void
+    public function recordCoaching(Coaching $coaching): void
     {
-        $this->coaching = $coaching;
+        $this->coaching = $coaching->toArray();
         $this->updatedAt = now();
     }
 
     /**
      * The stored Transcript, or null until transcribed.
      */
+    /**
+     * The stored Coaching, or null until the coaching step has run. Speeches processed before AI
+     * Coaching existed (ticket 15) stored an empty placeholder, which also reads as null.
+     */
+    public function coaching(): ?Coaching
+    {
+        return null === $this->coaching || [] === $this->coaching ? null : Coaching::fromArray($this->coaching);
+    }
+
     public function transcript(): ?Transcript
     {
         return null === $this->transcript ? null : Transcript::fromArray($this->transcript, (float) $this->durationSeconds);

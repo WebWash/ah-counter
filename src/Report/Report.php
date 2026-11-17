@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Report;
 
+use App\Coaching\Coaching;
+
 /**
  * The statistics of one Speech, plus its Coaching (SPEC §6.4). Computed on read, never stored.
  */
@@ -14,7 +16,7 @@ final readonly class Report
      * @param float                     $fillersPerMinuteRounded to 1 decimal, for display
      * @param array<string, int>        $byType                  Filler Type => count, most first, ties alphabetical
      * @param string|null               $topType                 the most frequent Filler Type, null with no Fillers
-     * @param array<string, mixed>|null $coaching                null until the coaching step has run
+     * @param Coaching|null             $coaching                null until the coaching step has run
      */
     public function __construct(
         public float $durationSeconds,
@@ -25,12 +27,12 @@ final readonly class Report
         public int $soundCount,
         public int $phraseCount,
         public ?string $topType,
-        public ?array $coaching,
+        public ?Coaching $coaching,
     ) {
     }
 
     /**
-     * @return array{durationSeconds: float, totalFillers: int, fillersPerMinute: float, fillersPerMinuteRounded: float, byType: array<string, int>, soundCount: int, phraseCount: int, topType: string|null, coaching: array<string, mixed>|null}
+     * @return array{durationSeconds: float, totalFillers: int, fillersPerMinute: float, fillersPerMinuteRounded: float, byType: array<string, int>, soundCount: int, phraseCount: int, topType: string|null, coaching: array{summary: string, patterns: list<string>, tips: list<string>}|null}
      */
     public function toArray(): array
     {
@@ -43,7 +45,7 @@ final readonly class Report
             'soundCount' => $this->soundCount,
             'phraseCount' => $this->phraseCount,
             'topType' => $this->topType,
-            'coaching' => $this->coaching,
+            'coaching' => $this->coaching?->toArray(),
         ];
     }
 }

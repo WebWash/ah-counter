@@ -1,4 +1,4 @@
-{# The Report of a done Speech (SPEC §7 "Report page layout"). Coaching arrives in ticket 15. #}
+{# The Report of a done Speech (SPEC §7 "Report page layout"). #}
 {% macro clock(seconds) %}{% set whole = seconds|round(0, 'floor') %}{{ whole // 60 }}:{{ '%02d'|format(whole % 60) }}{% endmacro %}
 {% import _self as report_helpers %}
 
@@ -71,6 +71,33 @@
         <section data-no-fillers class="rounded-2xl border border-emerald-200 bg-emerald-50 p-6 text-center">
             <h2 class="text-lg font-semibold text-emerald-900">No Fillers counted</h2>
             <p class="mt-1 text-sm text-emerald-800">Nothing in this Speech counted as a Filler. Well done: keep using pauses instead.</p>
+        </section>
+    {% endif %}
+
+    {# 5. Coaching #}
+    {% set coaching = report.coaching %}
+    {% if coaching is not null %}
+        <section data-coaching aria-labelledby="coaching-heading" class="rounded-2xl border border-sky-200 bg-sky-50 p-4 shadow-sm sm:p-6">
+            <h2 id="coaching-heading" class="text-lg font-semibold text-slate-900">Coaching</h2>
+            <p data-coaching-summary class="mt-2 text-base leading-7 text-slate-800">{{ coaching.summary }}</p>
+            <div class="mt-4 grid gap-4 sm:grid-cols-2">
+                {% if coaching.patterns is not empty %}
+                    <div>
+                        <h3 class="text-xs font-semibold uppercase tracking-wide text-sky-800">What we noticed</h3>
+                        <ul data-coaching-patterns class="mt-2 list-disc space-y-1 pl-5 text-sm leading-6 text-slate-700">
+                            {% for pattern in coaching.patterns %}<li>{{ pattern }}</li>{% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+                {% if coaching.tips is not empty %}
+                    <div>
+                        <h3 class="text-xs font-semibold uppercase tracking-wide text-sky-800">Try next time</h3>
+                        <ul data-coaching-tips class="mt-2 list-disc space-y-1 pl-5 text-sm leading-6 text-slate-700">
+                            {% for tip in coaching.tips %}<li>{{ tip }}</li>{% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+            </div>
         </section>
     {% endif %}
 

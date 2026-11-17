@@ -7,6 +7,7 @@ namespace App\Tests\Controller;
 use App\Analysis\FillerKind;
 use App\Analysis\FillerOccurrence;
 use App\Analysis\Verdict;
+use App\Coaching\Coaching;
 use App\Entity\Speech;
 use App\Tests\Fake\FakeTranscriber;
 use App\Tests\RecreatesDatabase;
@@ -123,6 +124,58 @@ final class ReportPageTest extends WebTestCase
         self::assertSame('[]', $crawler->filter('[data-controller="report-player"]')->attr('data-report-player-fillers-value'));
     }
 
+    public function testShowsTheCoachingBetweenTheBreakdownAndTheTranscript(): void
+    {
+        $speech = $this->createDoneSpeech(coaching: new Coaching(
+            '"um" was your most frequent Filler, twice in 30 seconds.',
+            ['Both "um" came mid-sentence, at 0:02 and 0:11.', 'One "like", at 0:06.'],
+            ['Pause silently where you would say "um".', 'Record a one-minute practice run.'],
+        ));
+        $crawler = $this->requestReport($speech);
+
+        self::assertResponseIsSuccessful();
+        self::assertSelectorTextContains('[data-coaching] h2', 'Coaching');
+        self::assertSelectorTextContains('[data-coaching-summary]', '"um" was your most frequent Filler, twice in 30 seconds.');
+        self::assertSame(
+            ['Both "um" came mid-sentence, at 0:02 and 0:11.', 'One "like", at 0:06.'],
+            $crawler->filter('[data-coaching-patterns] li')->each(static fn (Crawler $li): string => trim($li->text())),
+        );
+        self::assertSame(
+            ['Pause silently where you would say "um".', 'Record a one-minute practice run.'],
+            $crawler->filter('[data-coaching-tips] li')->each(static fn (Crawler $li): string => trim($li->text())),
+        );
+
+        $order = $crawler->filter('[data-breakdown], [data-coaching], [data-transcript]')->each(
+            static fn (Crawler $section): string => null !== $section->attr('data-breakdown') ? 'breakdown' : (null !== $section->attr('data-coaching') ? 'coaching' : 'transcript'),
+        );
+        self::assertSame(['breakdown', 'coaching', 'transcript'], $order, 'SPEC §7 layout: breakdown, Coaching, transcript');
+    }
+
+    public function testCoachingWithoutPatternsLeavesThatListOut(): void
+    {
+        $speech = $this->createDoneSpeech(['It', 'went', 'very', 'smoothly.'], [], new Coaching('No Fillers at all.', [], ['Keep pausing between ideas.']));
+        $this->requestReport($speech);
+
+        self::assertSelectorTextContains('[data-coaching-summary]', 'No Fillers at all.');
+        self::assertSelectorNotExists('[data-coaching-patterns]');
+        self::assertSelectorTextContains('[data-coaching-tips]', 'Keep pausing between ideas.');
+    }
+
+    public function testASpeechFromBeforeAiCoachingShowsNoCoachingPanel(): void
+    {
+        $speech = $this->createDoneSpeech();
+        // The ticket 12 placeholder stored empty Coaching.
+        $entityManager = self::getContainer()->get(EntityManagerInterface::class);
+        $updated = $entityManager->getConnection()->executeStatement('UPDATE speech SET coaching = ? WHERE id = ?', ['[]', $speech->getId()->toBinary()]);
+        self::assertSame(1, $updated);
+        $entityManager->clear();
+
+        $this->requestReport($speech);
+
+        self::assertResponseIsSuccessful();
+        self::assertSelectorNotExists('[data-coaching]');
+    }
+
     public function testADoneSpeechCanBeDeletedWithAnInlineConfirmation(): void
     {
         $speech = $this->createDoneSpeech();
@@ -140,7 +193,7 @@ final class ReportPageTest extends WebTestCase
      * @param list<string>|null           $spoken
      * @param list<FillerOccurrence>|null $fillers
      */
-    private function createDoneSpeech(?array $spoken = null, ?array $fillers = null): Speech
+    private function createDoneSpeech(?array $spoken = null, ?array $fillers = null, ?Coaching $coaching = null): Speech
     {
         $spoken ??= ['So', 'I', 'um', 'think', 'it', 'was', 'like', 'huge', 'and', 'you', 'know', 'um', 'done.'];
         $transcript = FakeTranscriber::transcript($spoken, 30.0);
@@ -155,7 +208,7 @@ final class ReportPageTest extends WebTestCase
         $speech = new Speech(Uuid::v4(), 'speech.webm', 'audio/webm', 29.5, 'Club speech');
         $speech->recordTranscript($transcript);
         $speech->recordFillers($fillers);
-        $speech->recordCoaching([]);
+        $speech->recordCoaching($coaching ?? new Coaching('Good pace.', [], ['Pause instead of saying um.']));
         $speech->markDone();
 
         $entityManager = self::getContainer()->get(EntityManagerInterface::class);

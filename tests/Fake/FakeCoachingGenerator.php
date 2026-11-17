@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Fake;
 
+use App\Coaching\Coaching;
 use App\Coaching\CoachingGenerator;
 use App\Report\Report;
 use App\Transcription\Transcript;
@@ -13,7 +14,6 @@ use App\Transcription\Transcript;
  */
 final class FakeCoachingGenerator implements CoachingGenerator
 {
-    public const array COACHING = ['summary' => 'Nice pace.', 'patterns' => [], 'tips' => ['Pause instead of saying um.']];
 
     public int $calls = 0;
 
@@ -42,7 +42,12 @@ final class FakeCoachingGenerator implements CoachingGenerator
         return $this;
     }
 
-    public function generate(Report $report, Transcript $transcript, array $fillers): array
+    public static function coaching(): Coaching
+    {
+        return new Coaching('Nice pace.', [], ['Pause instead of saying um.']);
+    }
+
+    public function generate(Report $report, Transcript $transcript, array $fillers): Coaching
     {
         ++$this->calls;
         $this->lastReport = $report;
@@ -53,6 +58,6 @@ final class FakeCoachingGenerator implements CoachingGenerator
             throw array_shift($this->failures);
         }
 
-        return self::COACHING;
+        return self::coaching();
     }
 }

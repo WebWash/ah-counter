@@ -67,7 +67,7 @@ final class ReportBuilder
             $soundCount,
             $phraseCount,
             [] === $byType ? null : (string) array_key_first($byType),
-            $speech->getCoaching(),
+            $speech->coaching(),
         );
     }
 }

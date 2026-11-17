@@ -7,6 +7,7 @@ namespace App\Tests\Report;
 use App\Analysis\FillerKind;
 use App\Analysis\FillerOccurrence;
 use App\Analysis\Verdict;
+use App\Coaching\Coaching;
 use App\Entity\Speech;
 use App\Entity\SpeechStatus;
 use App\Report\ReportBuilder;
@@ -109,6 +110,17 @@ final class ReportBuilderTest extends TestCase
 
         self::assertSame(1, $report->totalFillers);
         self::assertNull($report->coaching);
+    }
+
+    public function testCarriesTheSavedCoaching(): void
+    {
+        $speech = $this->speech(60.0, [$this->sound('um')]);
+        $speech->recordCoaching(new Coaching('One "um" in a minute.', ['"um" once, at 0:00.'], ['Pause instead.']));
+
+        $report = (new ReportBuilder())->build($speech);
+
+        self::assertEquals(new Coaching('One "um" in a minute.', ['"um" once, at 0:00.'], ['Pause instead.']), $report->coaching);
+        self::assertSame(['summary' => 'One "um" in a minute.', 'patterns' => ['"um" once, at 0:00.'], 'tips' => ['Pause instead.']], $report->toArray()['coaching']);
     }
 
     public function testIsNotAvailableBeforeTheFillersAreSaved(): void
