@@ -6,14 +6,16 @@ namespace App\Mcp;
 
 use App\Entity\Speech;
 use App\Report\ReportBuilder;
+use App\Report\SpeechComparer;
 use App\Report\TranscriptMarker;
 use App\Transcription\Transcript;
 use Mcp\Capability\Attribute\McpTool;
 use Mcp\Capability\Attribute\Schema;
+use Mcp\Exception\ToolCallException;
 use Mcp\Schema\ToolAnnotations;
 
 /**
- * The MCP read tools (SPEC §8): thin wrappers over SpeechRepository and ReportBuilder.
+ * The MCP read tools (SPEC §8): thin wrappers over SpeechRepository, ReportBuilder and SpeechComparer.
  *
  * Each returns a JSON object, so clients also get it as structuredContent (a bare list is only
  * sent as text before MCP protocol 2026-07-28).
@@ -30,6 +32,7 @@ final readonly class SpeechTools
         private McpSpeeches $speeches,
         private ReportBuilder $reportBuilder,
         private TranscriptMarker $marker,
+        private SpeechComparer $comparer,
     ) {
     }
 
@@ -117,6 +120,36 @@ final readonly class SpeechTools
         }
 
         return ['speechId' => $speech->getId()->toRfc4122(), 'fillers' => $fillers];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    #[McpTool(
+        name: 'compare_speeches',
+        title: 'Compare Speeches',
+        description: 'Compares a later Speech with an earlier baseline Speech: both durations and Fillers per minute, and for every Filler Type the counts, the rates and the change in rate. Every change is later minus baseline, so a negative change is an improvement. mostImproved and mostWorsened name the Filler Types whose rate fell or rose most (null when none did). Plain arithmetic, no AI.',
+        annotations: new ToolAnnotations(readOnlyHint: true, openWorldHint: false),
+    )]
+    public function compareSpeeches(
+        #[Schema(description: 'The earlier Speech to compare against (a UUID).', format: 'uuid')]
+        string $baselineSpeechId,
+        #[Schema(description: 'The later Speech (a UUID).', format: 'uuid')]
+        string $speechId,
+    ): array {
+        if (strtolower($baselineSpeechId) === strtolower($speechId)) {
+            throw new ToolCallException('baselineSpeechId and speechId are the same Speech. Pick two different Speeches to compare.');
+        }
+
+        $baseline = $this->speeches->done($baselineSpeechId);
+        $speech = $this->speeches->done($speechId);
+        $comparison = $this->comparer->compare($this->reportBuilder->build($baseline), $this->reportBuilder->build($speech))->toArray();
+
+        return [
+            ...$comparison,
+            'baseline' => ['id' => $baseline->getId()->toRfc4122(), 'title' => $baseline->getDisplayTitle(), ...$comparison['baseline']],
+            'speech' => ['id' => $speech->getId()->toRfc4122(), 'title' => $speech->getDisplayTitle(), ...$comparison['speech']],
+        ];
     }
 
     /**

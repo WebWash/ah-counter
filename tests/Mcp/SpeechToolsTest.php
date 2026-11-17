@@ -204,6 +204,48 @@ final class SpeechToolsTest extends KernelTestCase
         $this->tools->listFillers($speech->getId()->toRfc4122());
     }
 
+    public function testCompareSpeechesGivesTheChangeFromTheBaseline(): void
+    {
+        $baseline = $this->createDoneSpeech('Week 1');
+        $later = new Speech(Uuid::v4(), 'later.webm', 'audio/webm', 60.0, 'Week 2');
+        $later->recordTranscript(FakeTranscriber::transcript(['Well,', 'uh,', 'that', 'went', 'better.'], 60.0));
+        $later->recordFillers([new FillerOccurrence('uh', FillerKind::Sound, 1.0, 1.5, 1, 1, Verdict::Filler)]);
+        $later->recordCoaching(new Coaching('Better.', [], ['Keep pausing.']));
+        $later->markDone();
+        $this->persist($later);
+        $this->entityManager->flush();
+
+        $comparison = $this->tools->compareSpeeches($baseline->getId()->toRfc4122(), $later->getId()->toRfc4122());
+
+        self::assertSame(['id' => $baseline->getId()->toRfc4122(), 'title' => 'Week 1', 'durationSeconds' => 30.0, 'fillerCount' => 3, 'fillersPerMinute' => 6.0], $comparison['baseline']);
+        self::assertSame(['id' => $later->getId()->toRfc4122(), 'title' => 'Week 2', 'durationSeconds' => 60.0, 'fillerCount' => 1, 'fillersPerMinute' => 1.0], $comparison['speech']);
+        self::assertSame(-5.0, $comparison['fillersPerMinuteChange']);
+        self::assertSame(['um', 'like', 'uh'], array_column($comparison['byType'], 'type'));
+        self::assertSame([-4.0, -2.0, 1.0], array_column($comparison['byType'], 'perMinuteChange'));
+        self::assertSame('um', $comparison['mostImproved']);
+        self::assertSame('uh', $comparison['mostWorsened']);
+    }
+
+    public function testComparingASpeechWithItselfIsAToolError(): void
+    {
+        $id = $this->createDoneSpeech()->getId()->toRfc4122();
+        $this->expectToolError('Pick two different Speeches');
+
+        $this->tools->compareSpeeches($id, $id);
+    }
+
+    public function testComparingNeedsBothSpeechesDone(): void
+    {
+        $done = $this->createDoneSpeech();
+        $failed = $this->persist(new Speech(Uuid::v4(), 'a.webm', 'audio/webm', 30.0));
+        $failed->markFailed('The transcription service is unavailable.');
+        $this->entityManager->flush();
+
+        $this->expectToolError(\sprintf('Speech %s failed', $failed->getId()));
+
+        $this->tools->compareSpeeches($done->getId()->toRfc4122(), $failed->getId()->toRfc4122());
+    }
+
     private function expectToolError(string $message): void
     {
         $this->expectException(ToolCallException::class);
