@@ -27,7 +27,7 @@
                     {{ include('speech/_delete_form.html.twig') }}
                 </div>
             </section>
-        {% elseif speech.status.value == 'done' and report %}
+        {% elseif page %}
             {{ include('speech/_report.html.twig') }}
         {% elseif speech.status.value == 'done' %}
             {# Only a Speech finished before the pipeline saved Fillers can get here. #}

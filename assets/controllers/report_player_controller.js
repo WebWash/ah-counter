@@ -8,8 +8,9 @@ const REGION_COLORS = {
     phrase: 'rgba(217, 119, 6, 0.28)',
 };
 
-// Start playback a moment before a Filler so it is heard in context; still within ~0.3 s of it.
-const LEAD_IN_SECONDS = 0.25;
+// Start playback a moment before a Filler so its onset isn't clipped. Kept well inside the
+// ticket's "within about 0.3 s" so browser seek error has room too.
+const LEAD_IN_SECONDS = 0.1;
 
 /*
  * The Report's player (SPEC §7): a waveform with one region per counted Filler, and seeking from

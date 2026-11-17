@@ -11,4 +11,12 @@ enum FillerKind: string
 
     /** A real word or phrase: a Filler only when the surrounding words show it. */
     case Phrase = 'phrase';
+
+    public function label(): string
+    {
+        return match ($this) {
+            self::Sound => 'Filler Sound',
+            self::Phrase => 'Filler Phrase',
+        };
+    }
 }

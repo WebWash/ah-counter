@@ -2,8 +2,11 @@
 {% macro clock(seconds) %}{% set whole = seconds|round(0, 'floor') %}{{ whole // 60 }}:{{ '%02d'|format(whole % 60) }}{% endmacro %}
 {% import _self as report_helpers %}
 
-{% set sound_types = constant('App\\Analysis\\Lexicon::FILLER_SOUNDS')|keys %}
-{% set markers = counted_fillers|map(c => {start: c.filler.start, end: c.filler.end, kind: c.filler.kind.value, type: c.filler.type}) %}
+{% set report = page.report %}
+{% set markers = page.countedFillers|map(c => {start: c.filler.start, end: c.filler.end, kind: c.filler.kind.value, type: c.filler.type}) %}
+{# One colour per kind, shared by the waveform legend, bars, transcript and Filler list. #}
+{% set chip_classes = {sound: 'bg-rose-100 text-rose-800', phrase: 'bg-amber-100 text-amber-900'} %}
+{% set bar_classes = {sound: 'bg-rose-500', phrase: 'bg-amber-500'} %}
 
 <div class="mt-8 space-y-6"
      data-controller="report-player"
@@ -53,11 +56,11 @@
             <p class="mt-1 text-sm text-slate-500">{{ report.soundCount }} Filler Sound{{ report.soundCount == 1 ? '' : 's' }} · {{ report.phraseCount }} Filler Phrase{{ report.phraseCount == 1 ? '' : 's' }}</p>
             <ul class="mt-4 space-y-2">
                 {% for type, count in report.byType %}
-                    {% set kind = type in sound_types ? 'sound' : 'phrase' %}
+                    {% set kind = page.kindOf(type).value %}
                     <li data-filler-type="{{ type }}" data-kind="{{ kind }}" class="grid grid-cols-[5.5rem_1fr_2rem] items-center gap-3 text-sm">
                         <span class="truncate font-medium text-slate-700">{{ type }}</span>
                         <span class="h-3 overflow-hidden rounded-full bg-slate-100" aria-hidden="true">
-                            <span class="block h-full rounded-full {{ kind == 'sound' ? 'bg-rose-500' : 'bg-amber-500' }}" style="width: {{ (count / most * 100)|round(1) }}%"></span>
+                            <span class="block h-full rounded-full {{ bar_classes[kind] }}" style="width: {{ (count / most * 100)|round(1) }}%"></span>
                         </span>
                         <span data-count class="text-right font-mono tabular-nums text-slate-900">{{ count }}</span>
                     </li>
@@ -66,8 +69,8 @@
         </section>
     {% else %}
         <section data-no-fillers class="rounded-2xl border border-emerald-200 bg-emerald-50 p-6 text-center">
-            <h2 class="text-lg font-semibold text-emerald-900">No Fillers found</h2>
-            <p class="mt-1 text-sm text-emerald-800">Not a single um or uh in this Speech. Well done: keep using pauses instead.</p>
+            <h2 class="text-lg font-semibold text-emerald-900">No Fillers counted</h2>
+            <p class="mt-1 text-sm text-emerald-800">Nothing in this Speech counted as a Filler. Well done: keep using pauses instead.</p>
         </section>
     {% endif %}
 
@@ -76,7 +79,7 @@
         <h2 id="transcript-heading" class="text-lg font-semibold text-slate-900">Transcript</h2>
         <p class="mt-1 text-sm text-slate-500">Click any word to hear it. Faded words were checked and not counted; hover them to see why.</p>
         <div data-transcript class="mt-4 text-base leading-8 text-slate-800">
-            {%- for segment in segments %}
+            {%- for segment in page.segments %}
                 {% set occurrence = segment.occurrence %}
                 {% set text = segment.words|map(word => word.punctuated)|join(' ') %}
                 {% if occurrence is null %}
@@ -85,8 +88,8 @@
                 {% elseif occurrence.isFiller %}
                     <button type="button" data-report-player-target="segment" data-action="report-player#seek" data-start="{{ segment.start }}"
                             data-verdict="filler" data-kind="{{ occurrence.kind.value }}"
-                            title="{{ occurrence.kind.value == 'sound' ? 'Filler Sound' : 'Filler Phrase' }}: {{ occurrence.type }}{{ occurrence.reason ? ' (' ~ occurrence.reason ~ ')' }}"
-                            class="rounded px-1 font-semibold focus:outline-none focus-visible:ring-2 data-current:ring-2 data-current:ring-sky-400 {{ occurrence.kind.value == 'sound' ? 'bg-rose-100 text-rose-800 focus-visible:ring-rose-400' : 'bg-amber-100 text-amber-900 focus-visible:ring-amber-400' }}">{{ text }}</button>
+                            title="{{ occurrence.kind.label }}: {{ occurrence.type }}{{ occurrence.reason ? ' (' ~ occurrence.reason ~ ')' }}"
+                            class="rounded px-1 font-semibold focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 data-current:ring-2 data-current:ring-sky-400 {{ chip_classes[occurrence.kind.value] }}">{{ text }}</button>
                 {% else %}
                     <button type="button" tabindex="-1" data-report-player-target="segment" data-action="report-player#seek" data-start="{{ segment.start }}"
                             data-verdict="{{ occurrence.verdict.value }}" data-kind="{{ occurrence.kind.value }}"
@@ -98,7 +101,7 @@
     </section>
 
     {# 7. Filler list #}
-    {% if counted_fillers is not empty %}
+    {% if page.countedFillers is not empty %}
         <section data-filler-list aria-labelledby="filler-list-heading" class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
             <h2 id="filler-list-heading" class="px-4 pt-4 text-lg font-semibold text-slate-900 sm:px-6 sm:pt-6">Every Filler</h2>
             <table class="mt-3 w-full text-left text-sm">
@@ -110,7 +113,7 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
-                    {% for item in counted_fillers %}
+                    {% for item in page.countedFillers %}
                         {% set filler = item.filler %}
                         <tr data-start="{{ filler.start }}" data-action="click->report-player#seek" class="cursor-pointer hover:bg-slate-50">
                             <td class="px-4 py-2 align-top font-mono tabular-nums sm:pl-6">
@@ -118,7 +121,7 @@
                                         aria-label="Play from {{ report_helpers.clock(filler.start) }}">{{ report_helpers.clock(filler.start) }}</button>
                             </td>
                             <td class="px-2 py-2 align-top">
-                                <span class="rounded px-1.5 py-0.5 font-medium {{ filler.kind.value == 'sound' ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-900' }}">{{ filler.type }}</span>
+                                <span class="rounded px-1.5 py-0.5 font-medium {{ chip_classes[filler.kind.value] }}">{{ filler.type }}</span>
                             </td>
                             <td class="px-4 py-2 align-top text-slate-600 sm:pr-6">
                                 {{ item.context.before }} <strong class="font-semibold text-slate-900">{{ item.context.filler }}</strong> {{ item.context.after }}

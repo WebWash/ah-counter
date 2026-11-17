@@ -7,12 +7,10 @@ namespace App\Controller;
 use App\Dto\SpeechUpload;
 use App\Entity\Speech;
 use App\Entity\SpeechStatus;
-use App\Report\ReportBuilder;
-use App\Report\TranscriptMarker;
+use App\Report\ReportPageBuilder;
 use App\Speech\RecordingStorage;
 use App\Speech\SpeechLifecycle;
 use App\Speech\SpeechStillProcessing;
-use App\Transcription\Transcript;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -66,30 +64,12 @@ final class SpeechController extends AbstractController
      * The processing view, the error with Retry, or, once done, the Report (SPEC §7).
      */
     #[Route('/{id}', name: 'speech_show', methods: ['GET'])]
-    public function show(Speech $speech, ReportBuilder $reportBuilder, TranscriptMarker $marker): Response
+    public function show(Speech $speech, ReportPageBuilder $reportPageBuilder): Response
     {
-        $report = null;
-        $segments = [];
-        $countedFillers = [];
-
-        if (SpeechStatus::Done === $speech->getStatus() && null !== $report = $reportBuilder->buildIfAvailable($speech)) {
-            $transcript = $speech->transcript() ?? new Transcript([], $report->durationSeconds);
-            $occurrences = $speech->fillerOccurrences() ?? [];
-            $segments = $marker->segments($transcript, $occurrences);
-
-            foreach ($occurrences as $occurrence) {
-                if ($occurrence->isFiller()) {
-                    $countedFillers[] = ['filler' => $occurrence, 'context' => $marker->context($transcript, $occurrence)];
-                }
-            }
-        }
-
         return $this->render('speech/show.html.twig', [
             'speech' => $speech,
             'steps' => SpeechStatus::steps(),
-            'report' => $report,
-            'segments' => $segments,
-            'counted_fillers' => $countedFillers,
+            'page' => $reportPageBuilder->build($speech),
         ]);
     }
 

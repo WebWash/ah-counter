@@ -18,7 +18,7 @@
                             {% set report = reports[speech.id.toRfc4122] ?? null %}
                             <p class="text-right text-xs text-slate-500">
                                 <span class="block font-mono text-sm text-slate-900" {% if report %}data-fillers-per-minute{% endif %}>{{ report ? report.fillersPerMinuteRounded|number_format(1) : '—' }}</span>
-                                Fillers/min
+                                Fillers per minute
                             </p>
                         {% endif %}
                         {{ include('speech/_status_badge.html.twig', {status: speech.status}) }}

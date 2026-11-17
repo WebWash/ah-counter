@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Entity\SpeechStatus;
 use App\Report\ReportBuilder;
 use App\Repository\SpeechRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -20,12 +19,9 @@ final class HomeController extends AbstractController
     {
         $speeches = $speechRepository->findRecent(self::RECENT_SPEECHES);
 
-        // Reports are shown only for done Speeches (SPEC §6.4), keyed by Speech ID.
         $reports = [];
         foreach ($speeches as $speech) {
-            if (SpeechStatus::Done === $speech->getStatus()) {
-                $reports[$speech->getId()->toRfc4122()] = $reportBuilder->buildIfAvailable($speech);
-            }
+            $reports[$speech->getId()->toRfc4122()] = $reportBuilder->buildIfDone($speech);
         }
 
         return $this->render('home/index.html.twig', [

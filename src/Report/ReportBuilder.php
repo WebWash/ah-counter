@@ -6,6 +6,7 @@ namespace App\Report;
 
 use App\Analysis\FillerKind;
 use App\Entity\Speech;
+use App\Entity\SpeechStatus;
 
 /**
  * The one place that turns a Speech into a Report (SPEC §6.4), shared by the coaching step,
@@ -22,6 +23,14 @@ final class ReportBuilder
     public function build(Speech $speech): Report
     {
         return $this->buildIfAvailable($speech) ?? throw new ReportNotAvailable($speech);
+    }
+
+    /**
+     * The Report as the web pages and MCP tools show it: only for done Speeches (SPEC §6.4).
+     */
+    public function buildIfDone(Speech $speech): ?Report
+    {
+        return SpeechStatus::Done === $speech->getStatus() ? $this->buildIfAvailable($speech) : null;
     }
 
     public function buildIfAvailable(Speech $speech): ?Report
