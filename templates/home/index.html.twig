@@ -3,16 +3,16 @@
 {% block title %}Ah Counter{% endblock %}
 
 {% block body %}
-    <main class="mx-auto max-w-2xl px-4 py-16">
-        <h1 class="text-4xl font-bold tracking-tight text-slate-900">Ah Counter</h1>
-        <p class="mt-4 text-lg text-slate-600">
-            Record a short English speech and see every "um", "uh" and "you know" you said.
-        </p>
-        <section class="mt-8 rounded-lg border border-dashed border-slate-300 p-6 text-sm text-slate-500"
-                 data-controller="recorder"
-                 data-recorder-upload-url-value="{{ path('speech_upload') }}"
-                 data-recorder-csrf-token-value="{{ csrf_token(constant('App\\Controller\\SpeechController::UPLOAD_TOKEN_ID')) }}">
-            The recorder is coming soon.
-        </section>
+    <main class="mx-auto max-w-2xl px-4 py-10 sm:py-16">
+        <header>
+            <h1 class="text-4xl font-bold tracking-tight text-slate-900">Ah Counter</h1>
+            <p class="mt-3 text-lg text-slate-600">
+                Record a short English speech and see every "um", "uh" and "you know" you said.
+            </p>
+        </header>
+
+        <div class="mt-8">
+            {{ include('home/_recorder.html.twig') }}
+        </div>
     </main>
 {% endblock %}

@@ -26,4 +26,7 @@ return [
     'app' => ['path' => './assets/app.js', 'entrypoint' => true],
     '@hotwired/stimulus' => ['version' => '3.2.2'],
     '@symfony/stimulus-bundle' => ['path' => './vendor/symfony/stimulus-bundle/assets/dist/loader.js'],
+    'wavesurfer.js' => ['version' => '7.12.12'],
+    'wavesurfer.js/dist/plugins/record.esm.js' => ['version' => '7.12.12'],
+    'fix-webm-duration' => ['version' => '1.0.6'],
 ];
