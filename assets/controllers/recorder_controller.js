@@ -8,8 +8,13 @@ const MIN_MS = 10_000;
 const WARN_MS = 270_000; // 4:30
 const MAX_MS = 300_000; // 5:00
 
-// Preferred first; Safari falls back to mp4 (SPEC §7).
-const MIME_TYPES = ['audio/webm;codecs=opus', 'audio/mp4'];
+// Preferred first (SPEC §7). WebKit (Safari, and every browser on iOS) has recorded webm since
+// Safari 18.4, but it can't seek in its own webm: replay stalls and so would the Report player.
+// Its mp4 seeks fine, so WebKit records mp4. There is no feature test for this, hence the vendor check.
+const IS_WEBKIT = navigator.vendor === 'Apple Computer, Inc.';
+const MIME_TYPES = IS_WEBKIT
+    ? ['audio/mp4', 'audio/webm;codecs=opus']
+    : ['audio/webm;codecs=opus', 'audio/mp4'];
 
 /*
  * Records a Speech in the browser: microphone → live waveform and timer → review → upload.
