@@ -169,7 +169,7 @@ final class SpeechProgressTest extends WebTestCase
         self::assertResponseStatusCodeSame(404);
     }
 
-    public function testADoneSpeechShowsAPlaceholderUntilTheReportPageExists(): void
+    public function testADoneSpeechWithoutSavedFillersSaysThereIsNoReport(): void
     {
         $speech = $this->createSpeech(move: static fn (Speech $s) => $s->markDone());
 

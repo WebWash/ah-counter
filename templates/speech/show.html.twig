@@ -3,7 +3,7 @@
 {% block title %}{{ speech.displayTitle }} · Ah Counter{% endblock %}
 
 {% block body %}
-    <main class="mx-auto max-w-2xl px-4 py-10 sm:py-16">
+    <main class="mx-auto max-w-3xl px-4 py-10 sm:py-16">
         <a href="{{ path('app_home') }}" class="text-sm text-slate-500 hover:text-slate-800">&larr; All speeches</a>
 
         <header class="mt-4 flex flex-wrap items-center gap-3">
@@ -27,11 +27,13 @@
                     {{ include('speech/_delete_form.html.twig') }}
                 </div>
             </section>
+        {% elseif speech.status.value == 'done' and report %}
+            {{ include('speech/_report.html.twig') }}
         {% elseif speech.status.value == 'done' %}
-            {# Placeholder until the Report page (ticket 13). #}
+            {# Only a Speech finished before the pipeline saved Fillers can get here. #}
             <section class="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                <h2 class="text-lg font-semibold text-slate-900">Processing finished</h2>
-                <p class="mt-2 text-slate-600">The full Report will appear here.</p>
+                <h2 class="text-lg font-semibold text-slate-900">No Report for this Speech</h2>
+                <p class="mt-2 text-slate-600">It finished processing without any Fillers saved, so there is nothing to show. Delete it and record again.</p>
                 <div class="mt-6">{{ include('speech/_delete_form.html.twig') }}</div>
             </section>
         {% else %}

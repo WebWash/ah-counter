@@ -29,4 +29,5 @@ return [
     'wavesurfer.js' => ['version' => '7.12.12'],
     'wavesurfer.js/dist/plugins/record.esm.js' => ['version' => '7.12.12'],
     'fix-webm-duration' => ['version' => '1.0.6'],
+    'wavesurfer.js/dist/plugins/regions.esm.js' => ['version' => '7.12.12'],
 ];
