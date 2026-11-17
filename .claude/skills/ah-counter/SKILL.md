@@ -35,9 +35,15 @@ Vocabulary: use the terms in `GLOSSARY.md` exactly (**Speech**, **Recording**, *
 ## MCP tools (`src/Mcp/`)
 
 - A tool is a thin wrapper (`#[McpTool]`, `#[Schema]`) over a `src/` service. Business logic stays in the service.
-- Every tool calls `EntityManager::clear()` before loading, because the worker updates Speeches from another process.
-- An unknown ID, or a Speech that isn't `done`, throws `Mcp\Exception\ToolCallException` with a readable message, which the client receives as `isError: true`. Any other exception reaches the client as a bare "internal error".
-- STDOUT carries JSON-RPC only. Logs go to a file or STDERR.
+- Load Speeches only through `App\Mcp\McpSpeeches` (`recent()`, `done()`). It calls `EntityManager::clear()` first, because the worker updates Speeches from another process.
+- An unknown ID, or a Speech that isn't `done`, throws `Mcp\Exception\ToolCallException` with a readable message, which the client receives as `isError: true`. Any other exception reaches the client as a bare "internal error", so a tool that calls the AI catches its failures and rethrows them as `ToolCallException` (see `PracticeExerciseTool`).
+- Return a JSON object, not a bare list: only objects also reach the client as `structuredContent`.
+- STDOUT carries JSON-RPC only. Logs go to a file or STDERR. `tests/Mcp/McpServerEndToEndTest.php` runs the real server and fails on any stray STDOUT line.
+- Check what is registered with `bin/console debug:mcp` (and `debug:mcp <tool>` for its input schema).
+
+## Demo data
+
+`app:export-demo {id} {name}` saves a done Speech to `demo/` (`Speech::toExport()`); `app:load-demo` loads every `demo/*.json` back without API calls (`Speech::fromExport()`), skipping IDs already there.
 
 ## Tests
 
