@@ -151,7 +151,10 @@ export default class extends Controller {
         this.record.on('record-end', (blob) => this.onRecordEnd(blob));
         this.wavesurfer.on('play', () => this.renderPlayButton(true));
         this.wavesurfer.on('pause', () => this.renderPlayButton(false));
-        this.wavesurfer.on('finish', () => this.renderPlayButton(false));
+        this.wavesurfer.on('finish', () => {
+            this.renderPlayButton(false);
+            this.loadForReview();
+        });
     }
 
     onProgress(ms) {
@@ -185,8 +188,23 @@ export default class extends Controller {
         this.reviewDurationTarget.textContent = this.formatTime(durationMs);
         this.renderPlayButton(false);
         this.show('review');
-        await this.wavesurfer.loadBlob(this.blob);
+        this.loadForReview();
         this.titleTarget.focus();
+    }
+
+    /*
+     * Loads the Recording into the review player. Called again after each playthrough: Safari's
+     * first play of a recorded blob works, but replaying the same one stops after a few seconds,
+     * so every replay starts from a fresh load.
+     */
+    loadForReview() {
+        if (!this.blob) {
+            return;
+        }
+
+        // Safari can't decodeAudioData its own recording ("EncodingError: Decoding failed"). Only the
+        // waveform drawing needs the decode; playback still works, so the failure is ignored.
+        this.wavesurfer.loadBlob(this.blob).catch(() => {});
     }
 
     // --- helpers -------------------------------------------------------------
