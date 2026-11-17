@@ -22,8 +22,9 @@ use Symfony\Contracts\Service\ServiceProviderInterface;
  * Runs the Recordings in tests/accuracy/ through a real transcription provider and
  * compares the Filler Sounds it keeps with their hand count, if any (SPEC §10, ticket 04).
  *
- * For now it calls the provider directly and counts Filler Sounds in its raw words. Ticket 09
- * swaps in DeepgramTranscriber, and ticket 14 FillerDetector and, optionally, the Candidate judge.
+ * Deepgram goes through the app's DeepgramTranscriber (ticket 09); Whisper is called directly.
+ * Filler Sounds are counted in the transcribed words. Ticket 14 swaps in FillerDetector and,
+ * optionally, the Candidate judge.
  */
 #[AsCommand(name: 'app:accuracy-check', description: 'Compare a transcriber\'s Filler Sounds with the Recordings and hand counts in tests/accuracy/ (real API calls)')]
 final class AccuracyCheckCommand extends Command

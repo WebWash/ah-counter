@@ -6,9 +6,11 @@ namespace App\Tests\AccuracyCheck;
 
 use App\AccuracyCheck\AccuracyRecording;
 use App\AccuracyCheck\DeepgramAccuracyTranscriber;
+use App\Processing\PermanentFailure;
+use App\Transcription\DeepgramResponseNormaliser;
+use App\Transcription\DeepgramTranscriber;
 use PHPUnit\Framework\TestCase;
 use Symfony\AI\Platform\Bridge\Deepgram\Factory;
-use Symfony\AI\Platform\Exception\AuthenticationException;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\JsonMockResponse;
 use Symfony\Component\HttpClient\Response\MockResponse;
@@ -50,7 +52,7 @@ final class DeepgramAccuracyTranscriberTest extends TestCase
         $transcription = $this->transcriber(new JsonMockResponse(self::LISTEN_RESPONSE))->transcribe($this->recording());
 
         self::assertSame(['um', 'so', 'i', 'uh', 'think'], $transcription->words);
-        self::assertSame('Um, so I uh think.', $transcription->text);
+        self::assertSame('Um, so I uh think.', $transcription->text, 'the punctuated words, joined');
         self::assertSame(self::LISTEN_RESPONSE, $transcription->response);
 
         $listen = $this->listenRequest();
@@ -69,11 +71,11 @@ final class DeepgramAccuracyTranscriberTest extends TestCase
         self::assertSame('true', $query['filler_words']);
     }
 
-    public function testSurfacesAnHttpErrorAsAPlatformExceptionRatherThanMissingWords(): void
+    public function testSurfacesAnHttpErrorAsAFailureRatherThanMissingWords(): void
     {
         $unauthorised = new JsonMockResponse(['err_code' => 'INVALID_AUTH', 'err_msg' => 'Invalid credentials.'], ['http_code' => 401]);
 
-        $this->expectException(AuthenticationException::class);
+        $this->expectException(PermanentFailure::class);
 
         $this->transcriber($unauthorised)->transcribe($this->recording());
     }
@@ -88,7 +90,9 @@ final class DeepgramAccuracyTranscriberTest extends TestCase
                 : $listenResponse;
         });
 
-        return new DeepgramAccuracyTranscriber(Factory::createPlatform(apiKey: 'test-key', httpClient: $http), 'nova-2');
+        $normaliser = new DeepgramResponseNormaliser();
+
+        return new DeepgramAccuracyTranscriber(new DeepgramTranscriber(Factory::createPlatform(apiKey: 'test-key', httpClient: $http), $normaliser, 'nova-2'), $normaliser);
     }
 
     private function recording(): AccuracyRecording

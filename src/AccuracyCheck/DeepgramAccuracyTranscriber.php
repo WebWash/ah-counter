@@ -4,48 +4,33 @@ declare(strict_types=1);
 
 namespace App\AccuracyCheck;
 
-use Symfony\AI\Platform\Message\Content\Audio;
-use Symfony\AI\Platform\PlatformInterface;
+use App\Transcription\DeepgramResponseNormaliser;
+use App\Transcription\DeepgramTranscriber;
+use App\Transcription\Word;
 use Symfony\Component\DependencyInjection\Attribute\AsTaggedItem;
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
-use Symfony\Component\DependencyInjection\Attribute\Target;
 
 /**
- * Deepgram (DEEPGRAM_MODEL, Nova-2 per ADR 0001) with filler_words=true, the way SPEC §6.1 calls it.
+ * Deepgram through the app's own DeepgramTranscriber (ticket 09), so the accuracy check measures
+ * exactly what the pipeline sends and normalises.
  */
 #[AsTaggedItem('deepgram')]
 final readonly class DeepgramAccuracyTranscriber implements AccuracyTranscriber
 {
     public function __construct(
-        #[Target('deepgram')]
-        private PlatformInterface $deepgram,
-        #[Autowire(env: 'DEEPGRAM_MODEL')]
-        private string $model,
+        private DeepgramTranscriber $transcriber,
+        private DeepgramResponseNormaliser $normaliser,
     ) {
     }
 
     public function transcribe(AccuracyRecording $recording, array $providerOptions = []): RawTranscription
     {
-        $path = $recording->audioPath;
-        // Built by hand, not Audio::fromFile(), so the Recording's own MIME type is sent (SPEC §6.1).
-        $audio = new Audio(static fn (): string => (string) file_get_contents($path), $recording->mimeType, $path);
-
-        $deferred = $this->deepgram->invoke($this->model, $audio, [
-            'filler_words' => 'true',
-            'punctuate' => 'true',
-            'language' => 'en',
-            ...$providerOptions,
-        ]);
-        // Convert first so HTTP errors surface as platform exceptions, then read the raw words (ADR 0001).
-        $deferred->getResult();
-        $data = $deferred->getRawResult()->getData();
-
-        $alternative = $data['results']['channels'][0]['alternatives'][0] ?? [];
+        $response = $this->transcriber->listen($recording->audioPath, $recording->mimeType, $providerOptions);
+        $transcript = $this->normaliser->normalise($response);
 
         return new RawTranscription(
-            array_map(static fn (array $word): string => (string) $word['word'], $alternative['words'] ?? []),
-            (string) ($alternative['transcript'] ?? ''),
-            $data,
+            array_map(static fn (Word $word): string => $word->text, $transcript->words),
+            $transcript->text(),
+            $response,
         );
     }
 }
