@@ -9,6 +9,8 @@
 parameters:
     # Recordings live outside public/ (SPEC §6.8).
     app.recordings_dir: '%kernel.project_dir%/var/recordings'
+    # Demo Speeches: app:export-demo writes them, app:load-demo reads them (SPEC §11).
+    app.demo_dir: '%kernel.project_dir%/demo'
 
 services:
     # default configuration for services in *this* file
@@ -27,3 +29,4 @@ services:
 when@test:
     parameters:
         app.recordings_dir: '%kernel.project_dir%/var/test-recordings'
+        app.demo_dir: '%kernel.project_dir%/var/test-demo'

@@ -189,6 +189,69 @@ class Speech
         return null === $this->fillers ? null : array_map(FillerOccurrence::fromArray(...), $this->fillers);
     }
 
+    /**
+     * Every field, for demo data (app:export-demo, SPEC §11).
+     *
+     * @return array{id: string, title: string|null, createdAt: string, updatedAt: string, status: string, recordingFilename: string, recordingMimeType: string, durationSeconds: float|null, transcript: list<array<string, mixed>>|null, fillers: list<array<string, mixed>>|null, coaching: array<string, mixed>|null, error: string|null}
+     */
+    public function toExport(): array
+    {
+        return [
+            'id' => $this->id->toRfc4122(),
+            'title' => $this->title,
+            'createdAt' => $this->createdAt->format(\DATE_ATOM),
+            'updatedAt' => $this->updatedAt->format(\DATE_ATOM),
+            'status' => $this->status->value,
+            'recordingFilename' => $this->recordingFilename,
+            'recordingMimeType' => $this->recordingMimeType,
+            'durationSeconds' => $this->durationSeconds,
+            'transcript' => $this->transcript,
+            'fillers' => $this->fillers,
+            'coaching' => $this->coaching,
+            'error' => $this->error,
+        ];
+    }
+
+    /**
+     * Rebuilds a done Speech from toExport(), keeping its ID and dates. The data goes back through
+     * the same steps the pipeline uses, so a malformed file fails here rather than on the Report.
+     *
+     * @param array<string, mixed> $data
+     *
+     * @throws \InvalidArgumentException when it isn't a complete, done Speech
+     */
+    public static function fromExport(array $data): self
+    {
+        if (SpeechStatus::Done->value !== ($data['status'] ?? null)) {
+            throw new \InvalidArgumentException('Only a done Speech can be imported.');
+        }
+        foreach (['id', 'createdAt', 'updatedAt', 'recordingFilename', 'recordingMimeType', 'durationSeconds', 'transcript', 'fillers', 'coaching'] as $field) {
+            if (!isset($data[$field]) || ('coaching' === $field && [] === $data[$field])) {
+                throw new \InvalidArgumentException(\sprintf('The Speech has no "%s".', $field));
+            }
+        }
+
+        try {
+            $speech = new self(
+                Uuid::fromString((string) $data['id']),
+                (string) $data['recordingFilename'],
+                (string) $data['recordingMimeType'],
+                (float) $data['durationSeconds'],
+                isset($data['title']) ? (string) $data['title'] : null,
+            );
+            $speech->recordTranscript(Transcript::fromArray((array) $data['transcript'], (float) $data['durationSeconds']));
+            $speech->recordFillers(array_map(FillerOccurrence::fromArray(...), array_values((array) $data['fillers'])));
+            $speech->recordCoaching(Coaching::fromArray((array) $data['coaching']));
+            $speech->markDone();
+            $speech->createdAt = new \DateTimeImmutable((string) $data['createdAt']);
+            $speech->updatedAt = new \DateTimeImmutable((string) $data['updatedAt']);
+        } catch (\InvalidArgumentException|\ValueError|\TypeError|\DateMalformedStringException $e) {
+            throw new \InvalidArgumentException('The Speech data is malformed: '.$e->getMessage(), 0, $e);
+        }
+
+        return $speech;
+    }
+
     public function getId(): Uuid
     {
         return $this->id;
