@@ -18,3 +18,10 @@
 /phpunit.xml
 /.phpunit.cache/
 ###< phpunit/phpunit ###
+
+###> app/accuracy-check ###
+# Accuracy-check Recordings stay local (the owner's voice); any clip-N.json hand counts are committed.
+/tests/accuracy/*.webm
+/tests/accuracy/*.mp4
+/tests/accuracy/*.ogg
+###< app/accuracy-check ###

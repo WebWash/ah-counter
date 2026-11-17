@@ -1,0 +1,573 @@
+{
+    "metadata": {
+        "transaction_key": "deprecated",
+        "request_id": "01a1e88a-e024-7d83-974b-1b1fb1934dbd",
+        "sha256": "f0e043f6645dd3f04e82c3f64dee00c6913c00956fe0ea8fbc478a78ca89e714",
+        "created": "2026-11-17T08:06:18.569Z",
+        "duration": 51.24,
+        "channels": 1,
+        "models": [
+            "1abfe86b-e047-4eed-858a-35e5625b41ee"
+        ],
+        "model_info": {
+            "1abfe86b-e047-4eed-858a-35e5625b41ee": {
+                "name": "2-general-nova",
+                "version": "2024-01-06.5664",
+                "arch": "nova-2"
+            }
+        }
+    },
+    "results": {
+        "channels": [
+            {
+                "alternatives": [
+                    {
+                        "transcript": "Hello. My name is John. Uh, I like to build websites. Yeah. And right now, this is a test video... Oh, sorry. No. No. Uh, you know, this is a test audio for clip one. It's built on Symphony using AI, and, um, it's, you know, so so fast, so good. And I really... It's like the best, like... How do I say it? It's the best version ever. It's it's really fast. Uh, Yeah. So... Yeah.",
+                        "confidence": 0.9980469,
+                        "words": [
+                            {
+                                "word": "hello",
+                                "start": 2.48,
+                                "end": 2.98,
+                                "confidence": 0.9404297,
+                                "punctuated_word": "Hello."
+                            },
+                            {
+                                "word": "my",
+                                "start": 3.12,
+                                "end": 3.28,
+                                "confidence": 1,
+                                "punctuated_word": "My"
+                            },
+                            {
+                                "word": "name",
+                                "start": 3.28,
+                                "end": 3.78,
+                                "confidence": 1,
+                                "punctuated_word": "name"
+                            },
+                            {
+                                "word": "is",
+                                "start": 4.16,
+                                "end": 4.24,
+                                "confidence": 0.99902344,
+                                "punctuated_word": "is"
+                            },
+                            {
+                                "word": "john",
+                                "start": 4.24,
+                                "end": 4.74,
+                                "confidence": 0.9851074,
+                                "punctuated_word": "John."
+                            },
+                            {
+                                "word": "uh",
+                                "start": 6.3999996,
+                                "end": 6.48,
+                                "confidence": 0.97094727,
+                                "punctuated_word": "Uh,"
+                            },
+                            {
+                                "word": "i",
+                                "start": 6.48,
+                                "end": 6.56,
+                                "confidence": 0.99902344,
+                                "punctuated_word": "I"
+                            },
+                            {
+                                "word": "like",
+                                "start": 6.56,
+                                "end": 6.7999997,
+                                "confidence": 0.99316406,
+                                "punctuated_word": "like"
+                            },
+                            {
+                                "word": "to",
+                                "start": 6.7999997,
+                                "end": 6.8799996,
+                                "confidence": 0.9970703,
+                                "punctuated_word": "to"
+                            },
+                            {
+                                "word": "build",
+                                "start": 6.8799996,
+                                "end": 7.2,
+                                "confidence": 0.9980469,
+                                "punctuated_word": "build"
+                            },
+                            {
+                                "word": "websites",
+                                "start": 7.2,
+                                "end": 7.7,
+                                "confidence": 0.9975586,
+                                "punctuated_word": "websites."
+                            },
+                            {
+                                "word": "yeah",
+                                "start": 8.16,
+                                "end": 8.66,
+                                "confidence": 0.99902344,
+                                "punctuated_word": "Yeah."
+                            },
+                            {
+                                "word": "and",
+                                "start": 9.44,
+                                "end": 9.94,
+                                "confidence": 0.9980469,
+                                "punctuated_word": "And"
+                            },
+                            {
+                                "word": "right",
+                                "start": 11.28,
+                                "end": 11.5199995,
+                                "confidence": 0.9453125,
+                                "punctuated_word": "right"
+                            },
+                            {
+                                "word": "now",
+                                "start": 11.5199995,
+                                "end": 11.84,
+                                "confidence": 0.9238281,
+                                "punctuated_word": "now,"
+                            },
+                            {
+                                "word": "this",
+                                "start": 11.84,
+                                "end": 12,
+                                "confidence": 1,
+                                "punctuated_word": "this"
+                            },
+                            {
+                                "word": "is",
+                                "start": 12,
+                                "end": 12.24,
+                                "confidence": 0.99902344,
+                                "punctuated_word": "is"
+                            },
+                            {
+                                "word": "a",
+                                "start": 12.24,
+                                "end": 12.74,
+                                "confidence": 0.9980469,
+                                "punctuated_word": "a"
+                            },
+                            {
+                                "word": "test",
+                                "start": 13.955001,
+                                "end": 14.435,
+                                "confidence": 1,
+                                "punctuated_word": "test"
+                            },
+                            {
+                                "word": "video",
+                                "start": 14.435,
+                                "end": 14.935,
+                                "confidence": 1,
+                                "punctuated_word": "video..."
+                            },
+                            {
+                                "word": "oh",
+                                "start": 15.395,
+                                "end": 15.635,
+                                "confidence": 0.8034668,
+                                "punctuated_word": "Oh,"
+                            },
+                            {
+                                "word": "sorry",
+                                "start": 15.635,
+                                "end": 15.955,
+                                "confidence": 0.9875488,
+                                "punctuated_word": "sorry."
+                            },
+                            {
+                                "word": "no",
+                                "start": 15.955,
+                                "end": 16.115,
+                                "confidence": 0.9885254,
+                                "punctuated_word": "No."
+                            },
+                            {
+                                "word": "no",
+                                "start": 16.115,
+                                "end": 16.615,
+                                "confidence": 0.99902344,
+                                "punctuated_word": "No."
+                            },
+                            {
+                                "word": "uh",
+                                "start": 16.675001,
+                                "end": 16.915,
+                                "confidence": 0.99902344,
+                                "punctuated_word": "Uh,"
+                            },
+                            {
+                                "word": "you",
+                                "start": 16.915,
+                                "end": 17.155,
+                                "confidence": 0.9941406,
+                                "punctuated_word": "you"
+                            },
+                            {
+                                "word": "know",
+                                "start": 17.155,
+                                "end": 17.475,
+                                "confidence": 0.99658203,
+                                "punctuated_word": "know,"
+                            },
+                            {
+                                "word": "this",
+                                "start": 17.475,
+                                "end": 17.635,
+                                "confidence": 1,
+                                "punctuated_word": "this"
+                            },
+                            {
+                                "word": "is",
+                                "start": 17.635,
+                                "end": 17.875,
+                                "confidence": 0.99902344,
+                                "punctuated_word": "is"
+                            },
+                            {
+                                "word": "a",
+                                "start": 17.875,
+                                "end": 18.115,
+                                "confidence": 1,
+                                "punctuated_word": "a"
+                            },
+                            {
+                                "word": "test",
+                                "start": 18.115,
+                                "end": 18.355,
+                                "confidence": 1,
+                                "punctuated_word": "test"
+                            },
+                            {
+                                "word": "audio",
+                                "start": 18.355,
+                                "end": 18.855,
+                                "confidence": 1,
+                                "punctuated_word": "audio"
+                            },
+                            {
+                                "word": "for",
+                                "start": 19.315,
+                                "end": 19.815,
+                                "confidence": 0.99902344,
+                                "punctuated_word": "for"
+                            },
+                            {
+                                "word": "clip",
+                                "start": 20.195,
+                                "end": 20.515,
+                                "confidence": 0.9941406,
+                                "punctuated_word": "clip"
+                            },
+                            {
+                                "word": "one",
+                                "start": 20.515,
+                                "end": 21.015,
+                                "confidence": 0.9682617,
+                                "punctuated_word": "one."
+                            },
+                            {
+                                "word": "it's",
+                                "start": 21.795,
+                                "end": 22.035,
+                                "confidence": 0.9760742,
+                                "punctuated_word": "It's"
+                            },
+                            {
+                                "word": "built",
+                                "start": 22.035,
+                                "end": 22.275002,
+                                "confidence": 0.98291016,
+                                "punctuated_word": "built"
+                            },
+                            {
+                                "word": "on",
+                                "start": 22.275002,
+                                "end": 22.515,
+                                "confidence": 0.9951172,
+                                "punctuated_word": "on"
+                            },
+                            {
+                                "word": "symphony",
+                                "start": 22.515,
+                                "end": 23.015,
+                                "confidence": 0.49414062,
+                                "punctuated_word": "Symphony"
+                            },
+                            {
+                                "word": "using",
+                                "start": 23.075,
+                                "end": 23.475,
+                                "confidence": 0.9873047,
+                                "punctuated_word": "using"
+                            },
+                            {
+                                "word": "ai",
+                                "start": 23.475,
+                                "end": 23.975,
+                                "confidence": 0.79345703,
+                                "punctuated_word": "AI,"
+                            },
+                            {
+                                "word": "and",
+                                "start": 25.154999,
+                                "end": 25.395,
+                                "confidence": 0.7727051,
+                                "punctuated_word": "and,"
+                            },
+                            {
+                                "word": "um",
+                                "start": 25.395,
+                                "end": 25.895,
+                                "confidence": 0.9108887,
+                                "punctuated_word": "um,"
+                            },
+                            {
+                                "word": "it's",
+                                "start": 26.98,
+                                "end": 27.48,
+                                "confidence": 0.9983724,
+                                "punctuated_word": "it's,"
+                            },
+                            {
+                                "word": "you",
+                                "start": 28.02,
+                                "end": 28.18,
+                                "confidence": 0.9980469,
+                                "punctuated_word": "you"
+                            },
+                            {
+                                "word": "know",
+                                "start": 28.18,
+                                "end": 28.68,
+                                "confidence": 1,
+                                "punctuated_word": "know,"
+                            },
+                            {
+                                "word": "so",
+                                "start": 28.9,
+                                "end": 29.4,
+                                "confidence": 1,
+                                "punctuated_word": "so"
+                            },
+                            {
+                                "word": "so",
+                                "start": 30.1,
+                                "end": 30.42,
+                                "confidence": 0.8183594,
+                                "punctuated_word": "so"
+                            },
+                            {
+                                "word": "fast",
+                                "start": 30.42,
+                                "end": 30.92,
+                                "confidence": 0.96240234,
+                                "punctuated_word": "fast,"
+                            },
+                            {
+                                "word": "so",
+                                "start": 31.7,
+                                "end": 32.02,
+                                "confidence": 1,
+                                "punctuated_word": "so"
+                            },
+                            {
+                                "word": "good",
+                                "start": 32.02,
+                                "end": 32.52,
+                                "confidence": 0.8244629,
+                                "punctuated_word": "good."
+                            },
+                            {
+                                "word": "and",
+                                "start": 33.78,
+                                "end": 34.02,
+                                "confidence": 0.99609375,
+                                "punctuated_word": "And"
+                            },
+                            {
+                                "word": "i",
+                                "start": 34.02,
+                                "end": 34.18,
+                                "confidence": 0.9838867,
+                                "punctuated_word": "I"
+                            },
+                            {
+                                "word": "really",
+                                "start": 34.18,
+                                "end": 34.68,
+                                "confidence": 0.98828125,
+                                "punctuated_word": "really..."
+                            },
+                            {
+                                "word": "it's",
+                                "start": 34.82,
+                                "end": 35.06,
+                                "confidence": 0.9995117,
+                                "punctuated_word": "It's"
+                            },
+                            {
+                                "word": "like",
+                                "start": 35.06,
+                                "end": 35.3,
+                                "confidence": 0.66552734,
+                                "punctuated_word": "like"
+                            },
+                            {
+                                "word": "the",
+                                "start": 35.3,
+                                "end": 35.54,
+                                "confidence": 0.9770508,
+                                "punctuated_word": "the"
+                            },
+                            {
+                                "word": "best",
+                                "start": 35.54,
+                                "end": 36.04,
+                                "confidence": 0.72998047,
+                                "punctuated_word": "best,"
+                            },
+                            {
+                                "word": "like",
+                                "start": 36.5,
+                                "end": 37,
+                                "confidence": 1,
+                                "punctuated_word": "like..."
+                            },
+                            {
+                                "word": "how",
+                                "start": 37.62,
+                                "end": 37.78,
+                                "confidence": 0.9980469,
+                                "punctuated_word": "How"
+                            },
+                            {
+                                "word": "do",
+                                "start": 37.78,
+                                "end": 37.86,
+                                "confidence": 0.9970703,
+                                "punctuated_word": "do"
+                            },
+                            {
+                                "word": "i",
+                                "start": 37.86,
+                                "end": 38.02,
+                                "confidence": 1,
+                                "punctuated_word": "I"
+                            },
+                            {
+                                "word": "say",
+                                "start": 38.02,
+                                "end": 38.18,
+                                "confidence": 1,
+                                "punctuated_word": "say"
+                            },
+                            {
+                                "word": "it",
+                                "start": 38.18,
+                                "end": 38.66,
+                                "confidence": 0.99658203,
+                                "punctuated_word": "it?"
+                            },
+                            {
+                                "word": "it's",
+                                "start": 38.66,
+                                "end": 38.9,
+                                "confidence": 1,
+                                "punctuated_word": "It's"
+                            },
+                            {
+                                "word": "the",
+                                "start": 38.9,
+                                "end": 39.14,
+                                "confidence": 1,
+                                "punctuated_word": "the"
+                            },
+                            {
+                                "word": "best",
+                                "start": 39.14,
+                                "end": 39.54,
+                                "confidence": 1,
+                                "punctuated_word": "best"
+                            },
+                            {
+                                "word": "version",
+                                "start": 39.54,
+                                "end": 40.04,
+                                "confidence": 1,
+                                "punctuated_word": "version"
+                            },
+                            {
+                                "word": "ever",
+                                "start": 40.1,
+                                "end": 40.6,
+                                "confidence": 0.9995117,
+                                "punctuated_word": "ever."
+                            },
+                            {
+                                "word": "it's",
+                                "start": 41.38,
+                                "end": 41.88,
+                                "confidence": 0.99853516,
+                                "punctuated_word": "It's"
+                            },
+                            {
+                                "word": "it's",
+                                "start": 42.055,
+                                "end": 42.375,
+                                "confidence": 0.9995117,
+                                "punctuated_word": "it's"
+                            },
+                            {
+                                "word": "really",
+                                "start": 42.375,
+                                "end": 42.695,
+                                "confidence": 1,
+                                "punctuated_word": "really"
+                            },
+                            {
+                                "word": "fast",
+                                "start": 42.695,
+                                "end": 43.195,
+                                "confidence": 0.9980469,
+                                "punctuated_word": "fast."
+                            },
+                            {
+                                "word": "uh",
+                                "start": 46.695,
+                                "end": 47.195,
+                                "confidence": 0.7531738,
+                                "punctuated_word": "Uh,"
+                            },
+                            {
+                                "word": "yeah",
+                                "start": 47.335,
+                                "end": 47.835,
+                                "confidence": 0.87841797,
+                                "punctuated_word": "Yeah."
+                            },
+                            {
+                                "word": "so",
+                                "start": 48.455,
+                                "end": 48.955,
+                                "confidence": 0.9951172,
+                                "punctuated_word": "So..."
+                            },
+                            {
+                                "word": "yeah",
+                                "start": 49.015,
+                                "end": 49.515,
+                                "confidence": 0.9736328,
+                                "punctuated_word": "Yeah."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

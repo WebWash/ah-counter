@@ -1,0 +1,720 @@
+{
+    "metadata": {
+        "transaction_key": "deprecated",
+        "request_id": "01a1e88a-e355-7041-9878-6ac02fa6c10f",
+        "sha256": "ff9da13932a441d0a1345e27008732e3f9de88387babf82ab15ffeff790fbe8b",
+        "created": "2026-11-17T08:06:18.891Z",
+        "duration": 52.26,
+        "channels": 1,
+        "models": [
+            "1abfe86b-e047-4eed-858a-35e5625b41ee"
+        ],
+        "model_info": {
+            "1abfe86b-e047-4eed-858a-35e5625b41ee": {
+                "name": "2-general-nova",
+                "version": "2024-01-06.5664",
+                "arch": "nova-2"
+            }
+        }
+    },
+    "results": {
+        "channels": [
+            {
+                "alternatives": [
+                    {
+                        "transcript": "How was my week? Well, I started things by doing a live stream on Friday night, then I woke up Saturday morning and watched the formula one. Which formula one race? I totally forgot. Then for lunch, I had some sushi that was very tasty. And for Saturday night, I went out and had a late night coffee, which was a problem because I couldn't fall asleep that night. So I only ended up having about three hours of sleep. Then Sunday morning, had to clean the apartment and take out the rubbish and prepare for the week.",
+                        "confidence": 0.9995117,
+                        "words": [
+                            {
+                                "word": "how",
+                                "start": 3.1999998,
+                                "end": 3.52,
+                                "confidence": 0.99902344,
+                                "punctuated_word": "How"
+                            },
+                            {
+                                "word": "was",
+                                "start": 3.52,
+                                "end": 3.84,
+                                "confidence": 0.99902344,
+                                "punctuated_word": "was"
+                            },
+                            {
+                                "word": "my",
+                                "start": 3.84,
+                                "end": 4.24,
+                                "confidence": 1,
+                                "punctuated_word": "my"
+                            },
+                            {
+                                "word": "week",
+                                "start": 4.24,
+                                "end": 4.74,
+                                "confidence": 0.9995117,
+                                "punctuated_word": "week?"
+                            },
+                            {
+                                "word": "well",
+                                "start": 4.7999997,
+                                "end": 5.2999997,
+                                "confidence": 1,
+                                "punctuated_word": "Well,"
+                            },
+                            {
+                                "word": "i",
+                                "start": 5.92,
+                                "end": 6.16,
+                                "confidence": 1,
+                                "punctuated_word": "I"
+                            },
+                            {
+                                "word": "started",
+                                "start": 6.16,
+                                "end": 6.56,
+                                "confidence": 1,
+                                "punctuated_word": "started"
+                            },
+                            {
+                                "word": "things",
+                                "start": 6.56,
+                                "end": 7.06,
+                                "confidence": 1,
+                                "punctuated_word": "things"
+                            },
+                            {
+                                "word": "by",
+                                "start": 7.2799997,
+                                "end": 7.44,
+                                "confidence": 0.9970703,
+                                "punctuated_word": "by"
+                            },
+                            {
+                                "word": "doing",
+                                "start": 7.44,
+                                "end": 7.68,
+                                "confidence": 1,
+                                "punctuated_word": "doing"
+                            },
+                            {
+                                "word": "a",
+                                "start": 7.68,
+                                "end": 7.8399997,
+                                "confidence": 0.9980469,
+                                "punctuated_word": "a"
+                            },
+                            {
+                                "word": "live",
+                                "start": 7.8399997,
+                                "end": 8.16,
+                                "confidence": 0.5805664,
+                                "punctuated_word": "live"
+                            },
+                            {
+                                "word": "stream",
+                                "start": 8.16,
+                                "end": 8.639999,
+                                "confidence": 1,
+                                "punctuated_word": "stream"
+                            },
+                            {
+                                "word": "on",
+                                "start": 8.639999,
+                                "end": 9.12,
+                                "confidence": 1,
+                                "punctuated_word": "on"
+                            },
+                            {
+                                "word": "friday",
+                                "start": 9.12,
+                                "end": 9.62,
+                                "confidence": 1,
+                                "punctuated_word": "Friday"
+                            },
+                            {
+                                "word": "night",
+                                "start": 9.84,
+                                "end": 10.34,
+                                "confidence": 0.78125,
+                                "punctuated_word": "night,"
+                            },
+                            {
+                                "word": "then",
+                                "start": 10.48,
+                                "end": 10.719999,
+                                "confidence": 0.9472656,
+                                "punctuated_word": "then"
+                            },
+                            {
+                                "word": "i",
+                                "start": 10.719999,
+                                "end": 10.88,
+                                "confidence": 1,
+                                "punctuated_word": "I"
+                            },
+                            {
+                                "word": "woke",
+                                "start": 10.88,
+                                "end": 11.04,
+                                "confidence": 1,
+                                "punctuated_word": "woke"
+                            },
+                            {
+                                "word": "up",
+                                "start": 11.04,
+                                "end": 11.54,
+                                "confidence": 1,
+                                "punctuated_word": "up"
+                            },
+                            {
+                                "word": "saturday",
+                                "start": 11.679999,
+                                "end": 12.16,
+                                "confidence": 0.9951172,
+                                "punctuated_word": "Saturday"
+                            },
+                            {
+                                "word": "morning",
+                                "start": 12.16,
+                                "end": 12.66,
+                                "confidence": 1,
+                                "punctuated_word": "morning"
+                            },
+                            {
+                                "word": "and",
+                                "start": 13.085,
+                                "end": 13.405,
+                                "confidence": 1,
+                                "punctuated_word": "and"
+                            },
+                            {
+                                "word": "watched",
+                                "start": 13.405,
+                                "end": 13.645,
+                                "confidence": 0.9394531,
+                                "punctuated_word": "watched"
+                            },
+                            {
+                                "word": "the",
+                                "start": 13.645,
+                                "end": 13.805,
+                                "confidence": 0.99902344,
+                                "punctuated_word": "the"
+                            },
+                            {
+                                "word": "formula",
+                                "start": 13.805,
+                                "end": 14.205,
+                                "confidence": 0.5024414,
+                                "punctuated_word": "formula"
+                            },
+                            {
+                                "word": "one",
+                                "start": 14.205,
+                                "end": 14.525,
+                                "confidence": 0.94018555,
+                                "punctuated_word": "one."
+                            },
+                            {
+                                "word": "which",
+                                "start": 14.525,
+                                "end": 14.685,
+                                "confidence": 1,
+                                "punctuated_word": "Which"
+                            },
+                            {
+                                "word": "formula",
+                                "start": 14.685,
+                                "end": 15.085,
+                                "confidence": 0.99316406,
+                                "punctuated_word": "formula"
+                            },
+                            {
+                                "word": "one",
+                                "start": 15.085,
+                                "end": 15.325,
+                                "confidence": 0.9980469,
+                                "punctuated_word": "one"
+                            },
+                            {
+                                "word": "race",
+                                "start": 15.325,
+                                "end": 15.825,
+                                "confidence": 0.84228516,
+                                "punctuated_word": "race?"
+                            },
+                            {
+                                "word": "i",
+                                "start": 16.045,
+                                "end": 16.125,
+                                "confidence": 0.99902344,
+                                "punctuated_word": "I"
+                            },
+                            {
+                                "word": "totally",
+                                "start": 16.125,
+                                "end": 16.605,
+                                "confidence": 0.9980469,
+                                "punctuated_word": "totally"
+                            },
+                            {
+                                "word": "forgot",
+                                "start": 16.605,
+                                "end": 17.105,
+                                "confidence": 1,
+                                "punctuated_word": "forgot."
+                            },
+                            {
+                                "word": "then",
+                                "start": 18.365,
+                                "end": 18.525,
+                                "confidence": 0.99609375,
+                                "punctuated_word": "Then"
+                            },
+                            {
+                                "word": "for",
+                                "start": 18.525,
+                                "end": 18.685,
+                                "confidence": 0.9980469,
+                                "punctuated_word": "for"
+                            },
+                            {
+                                "word": "lunch",
+                                "start": 18.685,
+                                "end": 19.185,
+                                "confidence": 0.9970703,
+                                "punctuated_word": "lunch,"
+                            },
+                            {
+                                "word": "i",
+                                "start": 19.725,
+                                "end": 19.965,
+                                "confidence": 1,
+                                "punctuated_word": "I"
+                            },
+                            {
+                                "word": "had",
+                                "start": 19.965,
+                                "end": 20.285,
+                                "confidence": 1,
+                                "punctuated_word": "had"
+                            },
+                            {
+                                "word": "some",
+                                "start": 20.285,
+                                "end": 20.785,
+                                "confidence": 0.9970703,
+                                "punctuated_word": "some"
+                            },
+                            {
+                                "word": "sushi",
+                                "start": 21.325,
+                                "end": 21.825,
+                                "confidence": 1,
+                                "punctuated_word": "sushi"
+                            },
+                            {
+                                "word": "that",
+                                "start": 23.404999,
+                                "end": 23.564999,
+                                "confidence": 0.7084961,
+                                "punctuated_word": "that"
+                            },
+                            {
+                                "word": "was",
+                                "start": 23.564999,
+                                "end": 23.885,
+                                "confidence": 1,
+                                "punctuated_word": "was"
+                            },
+                            {
+                                "word": "very",
+                                "start": 23.885,
+                                "end": 24.045,
+                                "confidence": 0.9980469,
+                                "punctuated_word": "very"
+                            },
+                            {
+                                "word": "tasty",
+                                "start": 24.045,
+                                "end": 24.545,
+                                "confidence": 0.96875,
+                                "punctuated_word": "tasty."
+                            },
+                            {
+                                "word": "and",
+                                "start": 25.805,
+                                "end": 26.305,
+                                "confidence": 0.99902344,
+                                "punctuated_word": "And"
+                            },
+                            {
+                                "word": "for",
+                                "start": 27.78,
+                                "end": 27.94,
+                                "confidence": 0.99902344,
+                                "punctuated_word": "for"
+                            },
+                            {
+                                "word": "saturday",
+                                "start": 27.94,
+                                "end": 28.44,
+                                "confidence": 1,
+                                "punctuated_word": "Saturday"
+                            },
+                            {
+                                "word": "night",
+                                "start": 28.5,
+                                "end": 29,
+                                "confidence": 0.9970703,
+                                "punctuated_word": "night,"
+                            },
+                            {
+                                "word": "i",
+                                "start": 30.1,
+                                "end": 30.18,
+                                "confidence": 1,
+                                "punctuated_word": "I"
+                            },
+                            {
+                                "word": "went",
+                                "start": 30.18,
+                                "end": 30.42,
+                                "confidence": 1,
+                                "punctuated_word": "went"
+                            },
+                            {
+                                "word": "out",
+                                "start": 30.42,
+                                "end": 30.92,
+                                "confidence": 0.99902344,
+                                "punctuated_word": "out"
+                            },
+                            {
+                                "word": "and",
+                                "start": 31.62,
+                                "end": 31.86,
+                                "confidence": 0.99609375,
+                                "punctuated_word": "and"
+                            },
+                            {
+                                "word": "had",
+                                "start": 31.86,
+                                "end": 32.100002,
+                                "confidence": 1,
+                                "punctuated_word": "had"
+                            },
+                            {
+                                "word": "a",
+                                "start": 32.100002,
+                                "end": 32.34,
+                                "confidence": 1,
+                                "punctuated_word": "a"
+                            },
+                            {
+                                "word": "late",
+                                "start": 32.34,
+                                "end": 32.66,
+                                "confidence": 1,
+                                "punctuated_word": "late"
+                            },
+                            {
+                                "word": "night",
+                                "start": 32.66,
+                                "end": 32.9,
+                                "confidence": 0.99902344,
+                                "punctuated_word": "night"
+                            },
+                            {
+                                "word": "coffee",
+                                "start": 32.9,
+                                "end": 33.4,
+                                "confidence": 0.9909668,
+                                "punctuated_word": "coffee,"
+                            },
+                            {
+                                "word": "which",
+                                "start": 33.46,
+                                "end": 33.7,
+                                "confidence": 1,
+                                "punctuated_word": "which"
+                            },
+                            {
+                                "word": "was",
+                                "start": 33.7,
+                                "end": 33.78,
+                                "confidence": 1,
+                                "punctuated_word": "was"
+                            },
+                            {
+                                "word": "a",
+                                "start": 33.78,
+                                "end": 33.940002,
+                                "confidence": 1,
+                                "punctuated_word": "a"
+                            },
+                            {
+                                "word": "problem",
+                                "start": 33.940002,
+                                "end": 34.260002,
+                                "confidence": 1,
+                                "punctuated_word": "problem"
+                            },
+                            {
+                                "word": "because",
+                                "start": 34.260002,
+                                "end": 34.58,
+                                "confidence": 0.9394531,
+                                "punctuated_word": "because"
+                            },
+                            {
+                                "word": "i",
+                                "start": 34.58,
+                                "end": 34.82,
+                                "confidence": 0.99902344,
+                                "punctuated_word": "I"
+                            },
+                            {
+                                "word": "couldn't",
+                                "start": 34.82,
+                                "end": 35.06,
+                                "confidence": 0.9995117,
+                                "punctuated_word": "couldn't"
+                            },
+                            {
+                                "word": "fall",
+                                "start": 35.06,
+                                "end": 35.3,
+                                "confidence": 0.9941406,
+                                "punctuated_word": "fall"
+                            },
+                            {
+                                "word": "asleep",
+                                "start": 35.3,
+                                "end": 35.8,
+                                "confidence": 0.99902344,
+                                "punctuated_word": "asleep"
+                            },
+                            {
+                                "word": "that",
+                                "start": 36.18,
+                                "end": 36.420002,
+                                "confidence": 0.99902344,
+                                "punctuated_word": "that"
+                            },
+                            {
+                                "word": "night",
+                                "start": 36.420002,
+                                "end": 36.920002,
+                                "confidence": 0.9633789,
+                                "punctuated_word": "night."
+                            },
+                            {
+                                "word": "so",
+                                "start": 37.22,
+                                "end": 37.46,
+                                "confidence": 1,
+                                "punctuated_word": "So"
+                            },
+                            {
+                                "word": "i",
+                                "start": 37.46,
+                                "end": 37.7,
+                                "confidence": 1,
+                                "punctuated_word": "I"
+                            },
+                            {
+                                "word": "only",
+                                "start": 37.7,
+                                "end": 38.18,
+                                "confidence": 1,
+                                "punctuated_word": "only"
+                            },
+                            {
+                                "word": "ended",
+                                "start": 38.18,
+                                "end": 38.5,
+                                "confidence": 0.9980469,
+                                "punctuated_word": "ended"
+                            },
+                            {
+                                "word": "up",
+                                "start": 38.5,
+                                "end": 38.58,
+                                "confidence": 1,
+                                "punctuated_word": "up"
+                            },
+                            {
+                                "word": "having",
+                                "start": 38.58,
+                                "end": 38.98,
+                                "confidence": 1,
+                                "punctuated_word": "having"
+                            },
+                            {
+                                "word": "about",
+                                "start": 38.98,
+                                "end": 39.22,
+                                "confidence": 0.99316406,
+                                "punctuated_word": "about"
+                            },
+                            {
+                                "word": "three",
+                                "start": 39.22,
+                                "end": 39.46,
+                                "confidence": 1,
+                                "punctuated_word": "three"
+                            },
+                            {
+                                "word": "hours",
+                                "start": 39.46,
+                                "end": 39.78,
+                                "confidence": 1,
+                                "punctuated_word": "hours"
+                            },
+                            {
+                                "word": "of",
+                                "start": 39.78,
+                                "end": 39.86,
+                                "confidence": 0.99902344,
+                                "punctuated_word": "of"
+                            },
+                            {
+                                "word": "sleep",
+                                "start": 39.86,
+                                "end": 40.36,
+                                "confidence": 0.9650879,
+                                "punctuated_word": "sleep."
+                            },
+                            {
+                                "word": "then",
+                                "start": 41.475002,
+                                "end": 41.715,
+                                "confidence": 1,
+                                "punctuated_word": "Then"
+                            },
+                            {
+                                "word": "sunday",
+                                "start": 41.715,
+                                "end": 42.195,
+                                "confidence": 0.9892578,
+                                "punctuated_word": "Sunday"
+                            },
+                            {
+                                "word": "morning",
+                                "start": 42.195,
+                                "end": 42.695,
+                                "confidence": 0.9645996,
+                                "punctuated_word": "morning,"
+                            },
+                            {
+                                "word": "had",
+                                "start": 43.075,
+                                "end": 43.315002,
+                                "confidence": 0.61083984,
+                                "punctuated_word": "had"
+                            },
+                            {
+                                "word": "to",
+                                "start": 43.315002,
+                                "end": 43.395,
+                                "confidence": 1,
+                                "punctuated_word": "to"
+                            },
+                            {
+                                "word": "clean",
+                                "start": 43.395,
+                                "end": 43.635002,
+                                "confidence": 1,
+                                "punctuated_word": "clean"
+                            },
+                            {
+                                "word": "the",
+                                "start": 43.635002,
+                                "end": 43.795002,
+                                "confidence": 1,
+                                "punctuated_word": "the"
+                            },
+                            {
+                                "word": "apartment",
+                                "start": 43.795002,
+                                "end": 44.295002,
+                                "confidence": 1,
+                                "punctuated_word": "apartment"
+                            },
+                            {
+                                "word": "and",
+                                "start": 45.635002,
+                                "end": 46.135002,
+                                "confidence": 0.8305664,
+                                "punctuated_word": "and"
+                            },
+                            {
+                                "word": "take",
+                                "start": 46.915,
+                                "end": 47.235,
+                                "confidence": 0.9921875,
+                                "punctuated_word": "take"
+                            },
+                            {
+                                "word": "out",
+                                "start": 47.235,
+                                "end": 47.395,
+                                "confidence": 0.99609375,
+                                "punctuated_word": "out"
+                            },
+                            {
+                                "word": "the",
+                                "start": 47.395,
+                                "end": 47.475,
+                                "confidence": 1,
+                                "punctuated_word": "the"
+                            },
+                            {
+                                "word": "rubbish",
+                                "start": 47.475,
+                                "end": 47.975,
+                                "confidence": 1,
+                                "punctuated_word": "rubbish"
+                            },
+                            {
+                                "word": "and",
+                                "start": 48.595,
+                                "end": 48.915,
+                                "confidence": 0.9194336,
+                                "punctuated_word": "and"
+                            },
+                            {
+                                "word": "prepare",
+                                "start": 48.915,
+                                "end": 49.415,
+                                "confidence": 1,
+                                "punctuated_word": "prepare"
+                            },
+                            {
+                                "word": "for",
+                                "start": 49.475,
+                                "end": 49.715,
+                                "confidence": 1,
+                                "punctuated_word": "for"
+                            },
+                            {
+                                "word": "the",
+                                "start": 49.715,
+                                "end": 49.875,
+                                "confidence": 1,
+                                "punctuated_word": "the"
+                            },
+                            {
+                                "word": "week",
+                                "start": 49.875,
+                                "end": 50.375,
+                                "confidence": 0.9970703,
+                                "punctuated_word": "week."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

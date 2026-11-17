@@ -1,0 +1,615 @@
+{
+    "metadata": {
+        "transaction_key": "deprecated",
+        "request_id": "01a1e88a-e491-7051-abee-154b328fa463",
+        "sha256": "b08d88c9e1760057663cc93ae2b10c5f526c1299d6271cde80159445cdec5762",
+        "created": "2026-11-17T08:06:19.194Z",
+        "duration": 55.8,
+        "channels": 1,
+        "models": [
+            "1abfe86b-e047-4eed-858a-35e5625b41ee"
+        ],
+        "model_info": {
+            "1abfe86b-e047-4eed-858a-35e5625b41ee": {
+                "name": "2-general-nova",
+                "version": "2024-01-06.5664",
+                "arch": "nova-2"
+            }
+        }
+    },
+    "results": {
+        "channels": [
+            {
+                "alternatives": [
+                    {
+                        "transcript": "What is Drupal? Uh, Drupal is a open source CMS, and you use it to build enterprise level websites. It offers a, uh, fieldable system where you can create custom fields so you don't have to put everything into the post type. And it has a great module called views that allows you to create listing of content so you don't have to manually query the database. It's a powerful solution for companies and enterprise that need a way to manage their content.",
+                        "confidence": 1,
+                        "words": [
+                            {
+                                "word": "what",
+                                "start": 1.8399999,
+                                "end": 2.1599998,
+                                "confidence": 0.99609375,
+                                "punctuated_word": "What"
+                            },
+                            {
+                                "word": "is",
+                                "start": 2.1599998,
+                                "end": 2.6599998,
+                                "confidence": 1,
+                                "punctuated_word": "is"
+                            },
+                            {
+                                "word": "drupal",
+                                "start": 2.72,
+                                "end": 3.22,
+                                "confidence": 0.9975586,
+                                "punctuated_word": "Drupal?"
+                            },
+                            {
+                                "word": "uh",
+                                "start": 5.04,
+                                "end": 5.54,
+                                "confidence": 0.98339844,
+                                "punctuated_word": "Uh,"
+                            },
+                            {
+                                "word": "drupal",
+                                "start": 6.08,
+                                "end": 6.58,
+                                "confidence": 1,
+                                "punctuated_word": "Drupal"
+                            },
+                            {
+                                "word": "is",
+                                "start": 6.8799996,
+                                "end": 7.12,
+                                "confidence": 1,
+                                "punctuated_word": "is"
+                            },
+                            {
+                                "word": "a",
+                                "start": 7.12,
+                                "end": 7.6,
+                                "confidence": 0.9506836,
+                                "punctuated_word": "a"
+                            },
+                            {
+                                "word": "open",
+                                "start": 7.6,
+                                "end": 8,
+                                "confidence": 0.96533203,
+                                "punctuated_word": "open"
+                            },
+                            {
+                                "word": "source",
+                                "start": 8,
+                                "end": 8.5,
+                                "confidence": 0.99609375,
+                                "punctuated_word": "source"
+                            },
+                            {
+                                "word": "cms",
+                                "start": 8.559999,
+                                "end": 9.059999,
+                                "confidence": 0.98168945,
+                                "punctuated_word": "CMS,"
+                            },
+                            {
+                                "word": "and",
+                                "start": 11.2,
+                                "end": 11.36,
+                                "confidence": 0.99902344,
+                                "punctuated_word": "and"
+                            },
+                            {
+                                "word": "you",
+                                "start": 11.36,
+                                "end": 11.599999,
+                                "confidence": 0.99902344,
+                                "punctuated_word": "you"
+                            },
+                            {
+                                "word": "use",
+                                "start": 11.599999,
+                                "end": 11.84,
+                                "confidence": 1,
+                                "punctuated_word": "use"
+                            },
+                            {
+                                "word": "it",
+                                "start": 11.84,
+                                "end": 12,
+                                "confidence": 1,
+                                "punctuated_word": "it"
+                            },
+                            {
+                                "word": "to",
+                                "start": 12,
+                                "end": 12.16,
+                                "confidence": 1,
+                                "punctuated_word": "to"
+                            },
+                            {
+                                "word": "build",
+                                "start": 12.16,
+                                "end": 12.48,
+                                "confidence": 1,
+                                "punctuated_word": "build"
+                            },
+                            {
+                                "word": "enterprise",
+                                "start": 12.48,
+                                "end": 12.98,
+                                "confidence": 1,
+                                "punctuated_word": "enterprise"
+                            },
+                            {
+                                "word": "level",
+                                "start": 13.04,
+                                "end": 13.54,
+                                "confidence": 1,
+                                "punctuated_word": "level"
+                            },
+                            {
+                                "word": "websites",
+                                "start": 14.405001,
+                                "end": 14.905001,
+                                "confidence": 0.99658203,
+                                "punctuated_word": "websites."
+                            },
+                            {
+                                "word": "it",
+                                "start": 17.685,
+                                "end": 17.925,
+                                "confidence": 1,
+                                "punctuated_word": "It"
+                            },
+                            {
+                                "word": "offers",
+                                "start": 17.925,
+                                "end": 18.405,
+                                "confidence": 1,
+                                "punctuated_word": "offers"
+                            },
+                            {
+                                "word": "a",
+                                "start": 18.405,
+                                "end": 18.905,
+                                "confidence": 0.98950195,
+                                "punctuated_word": "a,"
+                            },
+                            {
+                                "word": "uh",
+                                "start": 19.445,
+                                "end": 19.945,
+                                "confidence": 0.9995117,
+                                "punctuated_word": "uh,"
+                            },
+                            {
+                                "word": "fieldable",
+                                "start": 20.965,
+                                "end": 21.465,
+                                "confidence": 0.6986084,
+                                "punctuated_word": "fieldable"
+                            },
+                            {
+                                "word": "system",
+                                "start": 22.085,
+                                "end": 22.585,
+                                "confidence": 1,
+                                "punctuated_word": "system"
+                            },
+                            {
+                                "word": "where",
+                                "start": 22.805,
+                                "end": 23.045,
+                                "confidence": 0.87353516,
+                                "punctuated_word": "where"
+                            },
+                            {
+                                "word": "you",
+                                "start": 23.045,
+                                "end": 23.125,
+                                "confidence": 1,
+                                "punctuated_word": "you"
+                            },
+                            {
+                                "word": "can",
+                                "start": 23.125,
+                                "end": 23.285,
+                                "confidence": 1,
+                                "punctuated_word": "can"
+                            },
+                            {
+                                "word": "create",
+                                "start": 23.285,
+                                "end": 23.605,
+                                "confidence": 1,
+                                "punctuated_word": "create"
+                            },
+                            {
+                                "word": "custom",
+                                "start": 23.605,
+                                "end": 24.005001,
+                                "confidence": 0.99902344,
+                                "punctuated_word": "custom"
+                            },
+                            {
+                                "word": "fields",
+                                "start": 24.005001,
+                                "end": 24.505001,
+                                "confidence": 0.9970703,
+                                "punctuated_word": "fields"
+                            },
+                            {
+                                "word": "so",
+                                "start": 25.205,
+                                "end": 25.525,
+                                "confidence": 0.52490234,
+                                "punctuated_word": "so"
+                            },
+                            {
+                                "word": "you",
+                                "start": 25.525,
+                                "end": 25.685001,
+                                "confidence": 1,
+                                "punctuated_word": "you"
+                            },
+                            {
+                                "word": "don't",
+                                "start": 25.685001,
+                                "end": 25.925,
+                                "confidence": 1,
+                                "punctuated_word": "don't"
+                            },
+                            {
+                                "word": "have",
+                                "start": 25.925,
+                                "end": 26.085,
+                                "confidence": 1,
+                                "punctuated_word": "have"
+                            },
+                            {
+                                "word": "to",
+                                "start": 26.085,
+                                "end": 26.585,
+                                "confidence": 1,
+                                "punctuated_word": "to"
+                            },
+                            {
+                                "word": "put",
+                                "start": 26.805,
+                                "end": 27.045,
+                                "confidence": 1,
+                                "punctuated_word": "put"
+                            },
+                            {
+                                "word": "everything",
+                                "start": 27.045,
+                                "end": 27.545,
+                                "confidence": 1,
+                                "punctuated_word": "everything"
+                            },
+                            {
+                                "word": "into",
+                                "start": 27.605,
+                                "end": 27.925,
+                                "confidence": 1,
+                                "punctuated_word": "into"
+                            },
+                            {
+                                "word": "the",
+                                "start": 27.925,
+                                "end": 28.325,
+                                "confidence": 1,
+                                "punctuated_word": "the"
+                            },
+                            {
+                                "word": "post",
+                                "start": 28.325,
+                                "end": 28.825,
+                                "confidence": 1,
+                                "punctuated_word": "post"
+                            },
+                            {
+                                "word": "type",
+                                "start": 28.885,
+                                "end": 29.385,
+                                "confidence": 0.7871094,
+                                "punctuated_word": "type."
+                            },
+                            {
+                                "word": "and",
+                                "start": 32.32,
+                                "end": 32.56,
+                                "confidence": 0.8354492,
+                                "punctuated_word": "And"
+                            },
+                            {
+                                "word": "it",
+                                "start": 32.56,
+                                "end": 32.72,
+                                "confidence": 0.6977539,
+                                "punctuated_word": "it"
+                            },
+                            {
+                                "word": "has",
+                                "start": 32.72,
+                                "end": 32.96,
+                                "confidence": 1,
+                                "punctuated_word": "has"
+                            },
+                            {
+                                "word": "a",
+                                "start": 32.96,
+                                "end": 33.04,
+                                "confidence": 1,
+                                "punctuated_word": "a"
+                            },
+                            {
+                                "word": "great",
+                                "start": 33.04,
+                                "end": 33.36,
+                                "confidence": 1,
+                                "punctuated_word": "great"
+                            },
+                            {
+                                "word": "module",
+                                "start": 33.36,
+                                "end": 33.86,
+                                "confidence": 0.9970703,
+                                "punctuated_word": "module"
+                            },
+                            {
+                                "word": "called",
+                                "start": 33.92,
+                                "end": 34.4,
+                                "confidence": 0.9970703,
+                                "punctuated_word": "called"
+                            },
+                            {
+                                "word": "views",
+                                "start": 34.4,
+                                "end": 34.9,
+                                "confidence": 0.9863281,
+                                "punctuated_word": "views"
+                            },
+                            {
+                                "word": "that",
+                                "start": 34.96,
+                                "end": 35.2,
+                                "confidence": 0.9970703,
+                                "punctuated_word": "that"
+                            },
+                            {
+                                "word": "allows",
+                                "start": 35.2,
+                                "end": 35.52,
+                                "confidence": 1,
+                                "punctuated_word": "allows"
+                            },
+                            {
+                                "word": "you",
+                                "start": 35.52,
+                                "end": 35.84,
+                                "confidence": 1,
+                                "punctuated_word": "you"
+                            },
+                            {
+                                "word": "to",
+                                "start": 35.84,
+                                "end": 36,
+                                "confidence": 0.99902344,
+                                "punctuated_word": "to"
+                            },
+                            {
+                                "word": "create",
+                                "start": 36,
+                                "end": 36.5,
+                                "confidence": 1,
+                                "punctuated_word": "create"
+                            },
+                            {
+                                "word": "listing",
+                                "start": 36.72,
+                                "end": 37.22,
+                                "confidence": 0.9873047,
+                                "punctuated_word": "listing"
+                            },
+                            {
+                                "word": "of",
+                                "start": 37.760002,
+                                "end": 37.92,
+                                "confidence": 0.99902344,
+                                "punctuated_word": "of"
+                            },
+                            {
+                                "word": "content",
+                                "start": 37.92,
+                                "end": 38.42,
+                                "confidence": 1,
+                                "punctuated_word": "content"
+                            },
+                            {
+                                "word": "so",
+                                "start": 39.6,
+                                "end": 39.92,
+                                "confidence": 0.54345703,
+                                "punctuated_word": "so"
+                            },
+                            {
+                                "word": "you",
+                                "start": 39.92,
+                                "end": 40,
+                                "confidence": 1,
+                                "punctuated_word": "you"
+                            },
+                            {
+                                "word": "don't",
+                                "start": 40,
+                                "end": 40.32,
+                                "confidence": 1,
+                                "punctuated_word": "don't"
+                            },
+                            {
+                                "word": "have",
+                                "start": 40.32,
+                                "end": 40.56,
+                                "confidence": 1,
+                                "punctuated_word": "have"
+                            },
+                            {
+                                "word": "to",
+                                "start": 40.56,
+                                "end": 40.8,
+                                "confidence": 1,
+                                "punctuated_word": "to"
+                            },
+                            {
+                                "word": "manually",
+                                "start": 40.8,
+                                "end": 41.3,
+                                "confidence": 1,
+                                "punctuated_word": "manually"
+                            },
+                            {
+                                "word": "query",
+                                "start": 42.16,
+                                "end": 42.559998,
+                                "confidence": 1,
+                                "punctuated_word": "query"
+                            },
+                            {
+                                "word": "the",
+                                "start": 42.559998,
+                                "end": 42.72,
+                                "confidence": 1,
+                                "punctuated_word": "the"
+                            },
+                            {
+                                "word": "database",
+                                "start": 42.72,
+                                "end": 43.22,
+                                "confidence": 1,
+                                "punctuated_word": "database."
+                            },
+                            {
+                                "word": "it's",
+                                "start": 44.985,
+                                "end": 45.225,
+                                "confidence": 1,
+                                "punctuated_word": "It's"
+                            },
+                            {
+                                "word": "a",
+                                "start": 45.225,
+                                "end": 45.465,
+                                "confidence": 1,
+                                "punctuated_word": "a"
+                            },
+                            {
+                                "word": "powerful",
+                                "start": 45.465,
+                                "end": 45.864998,
+                                "confidence": 1,
+                                "punctuated_word": "powerful"
+                            },
+                            {
+                                "word": "solution",
+                                "start": 45.864998,
+                                "end": 46.364998,
+                                "confidence": 1,
+                                "punctuated_word": "solution"
+                            },
+                            {
+                                "word": "for",
+                                "start": 48.585,
+                                "end": 48.905,
+                                "confidence": 0.9970703,
+                                "punctuated_word": "for"
+                            },
+                            {
+                                "word": "companies",
+                                "start": 48.905,
+                                "end": 49.385,
+                                "confidence": 1,
+                                "punctuated_word": "companies"
+                            },
+                            {
+                                "word": "and",
+                                "start": 49.385,
+                                "end": 49.705,
+                                "confidence": 0.99609375,
+                                "punctuated_word": "and"
+                            },
+                            {
+                                "word": "enterprise",
+                                "start": 49.705,
+                                "end": 50.205,
+                                "confidence": 0.9760742,
+                                "punctuated_word": "enterprise"
+                            },
+                            {
+                                "word": "that",
+                                "start": 51.305,
+                                "end": 51.545,
+                                "confidence": 0.8886719,
+                                "punctuated_word": "that"
+                            },
+                            {
+                                "word": "need",
+                                "start": 51.545,
+                                "end": 51.704998,
+                                "confidence": 0.9970703,
+                                "punctuated_word": "need"
+                            },
+                            {
+                                "word": "a",
+                                "start": 51.704998,
+                                "end": 51.785,
+                                "confidence": 0.97998047,
+                                "punctuated_word": "a"
+                            },
+                            {
+                                "word": "way",
+                                "start": 51.785,
+                                "end": 52.184998,
+                                "confidence": 1,
+                                "punctuated_word": "way"
+                            },
+                            {
+                                "word": "to",
+                                "start": 52.184998,
+                                "end": 52.345,
+                                "confidence": 0.99902344,
+                                "punctuated_word": "to"
+                            },
+                            {
+                                "word": "manage",
+                                "start": 52.345,
+                                "end": 52.825,
+                                "confidence": 1,
+                                "punctuated_word": "manage"
+                            },
+                            {
+                                "word": "their",
+                                "start": 52.825,
+                                "end": 53.065,
+                                "confidence": 0.9980469,
+                                "punctuated_word": "their"
+                            },
+                            {
+                                "word": "content",
+                                "start": 53.065,
+                                "end": 53.565,
+                                "confidence": 0.9995117,
+                                "punctuated_word": "content."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}
