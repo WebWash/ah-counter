@@ -25,3 +25,15 @@
 /tests/accuracy/*.mp4
 /tests/accuracy/*.ogg
 ###< app/accuracy-check ###
+
+###> local agent tooling ###
+/.codex/
+/.impeccable/
+/.claude/agents/
+/.claude/skills/impeccable/
+/.agents/skills/impeccable/
+###< local agent tooling ###
+
+###> local docs ###
+/docs/
+###< local docs ###
