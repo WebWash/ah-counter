@@ -4,7 +4,8 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>{% block title %}Ah Counter{% endblock %}</title>
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22><rect width=%2216%22 height=%2216%22 fill=%22%23fff%22/><path d=%22M1 1h14L1 15z%22 fill=%22%23111%22/><rect x=%221%22 y=%221%22 width=%2214%22 height=%2214%22 fill=%22none%22 stroke=%22%23111%22 stroke-width=%222%22/></svg>">
+        {# A tally gate, four strokes and the fifth across them, in form blue. #}
+        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><rect width=%2232%22 height=%2232%22 rx=%226%22 fill=%22%231f4fa0%22/><g stroke=%22%23fff%22 stroke-width=%223%22 stroke-linecap=%22round%22><path d=%22M9 8v16M14 8v16M19 8v16M24 8v16M5 21l22-9%22/></g></svg>">
         {% block stylesheets %}
         {% endblock %}
 
@@ -19,18 +20,19 @@
         <script src="https://cdn.jsdelivr.net/npm/frankenphp-hot-reload/+esm" type="module"></script>
         {% endif %}
     </head>
-    <body class="antialiased">
-        <a href="#main" class="btn btn--small sr-only focus:not-sr-only">Skip to the page content</a>
-        <div class="frame">
-            {% set on_home = app.request.attributes.get('_route') == 'app_home' %}
-            <header class="bar">
-                <a class="bar__mark" href="{{ path('app_home') }}">Ah Counter</a>
-                <nav aria-label="Main">
-                    <a class="bar__link" href="{{ path('app_home') }}#speeches" {% if on_home %}aria-current="page"{% endif %}>Speeches</a>
-                </nav>
-                <a class="btn btn--small bar__action" href="{{ path('app_home') }}#recorder">New Speech</a>
-            </header>
-            {% block body %}{% endblock %}
-        </div>
+    <body>
+        <a href="#main" class="skip">Skip to the page content</a>
+        {% set on_home = app.request.attributes.get('_route') == 'app_home' %}
+        <header class="bar">
+            <a class="bar__mark" href="{{ path('app_home') }}">
+                <svg width="24" height="20" viewBox="0 0 24 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M5 2v16M10 2v16M15 2v16M20 2v16M1.5 14l21-8"/></svg>
+                Ah Counter
+            </a>
+            <nav aria-label="Main">
+                <a class="bar__link" href="{{ path('app_home') }}#speeches" {% if on_home %}aria-current="page"{% endif %}>Speeches</a>
+            </nav>
+            <a class="btn btn--bar" href="{{ path('app_home') }}#recorder">New Speech</a>
+        </header>
+        {% block body %}{% endblock %}
     </body>
 </html>

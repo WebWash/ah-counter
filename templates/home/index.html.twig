@@ -3,10 +3,10 @@
 {% block title %}Ah Counter{% endblock %}
 
 {% block body %}
-    <main id="main" class="flex flex-1 flex-col">
+    <main id="main" class="page">
         {{ include('home/_recorder.html.twig') }}
 
-        <div class="sheet" id="speeches">
+        <div class="list-band" id="speeches">
             {{ include('home/_recent_speeches.html.twig') }}
         </div>
     </main>

@@ -23,7 +23,7 @@ const MIME_TYPES = IS_WEBKIT
  * idle, recording, review, uploading.
  */
 export default class extends Controller {
-    static targets = ['panel', 'waveform', 'timer', 'warning', 'message', 'reviewDuration', 'title', 'playButton', 'cell'];
+    static targets = ['panel', 'waveform', 'timer', 'warning', 'message', 'reviewDuration', 'title', 'playButton', 'progress'];
     static values = { uploadUrl: String, csrfToken: String };
 
     connect() {
@@ -62,7 +62,7 @@ export default class extends Controller {
         this.createWaveform(mimeType);
         this.durationMs = 0;
         this.renderTimer(0);
-        this.fillCells(0);
+        this.renderProgress(0);
         this.warningTarget.hidden = true;
         this.show('recording');
 
@@ -87,7 +87,7 @@ export default class extends Controller {
         this.blob = null;
         this.titleTarget.value = '';
         this.clearMessage();
-        this.fillCells(0);
+        this.renderProgress(0);
         this.show('idle');
     }
 
@@ -134,14 +134,14 @@ export default class extends Controller {
         this.wavesurfer?.destroy();
         this.wavesurfer = WaveSurfer.create({
             container: this.waveformTarget,
-            height: 70,
-            waveColor: '#8c8c8c',
-            progressColor: '#111111',
-            cursorColor: '#e8401c',
+            height: 80,
+            waveColor: '#b8c6e0',
+            progressColor: '#1f4fa0',
+            cursorColor: '#15181d',
             cursorWidth: 2,
-            barWidth: 2,
+            barWidth: 3,
             barGap: 2,
-            barRadius: 0,
+            barRadius: 2,
         });
         this.record = this.wavesurfer.registerPlugin(RecordPlugin.create({
             mimeType,
@@ -163,7 +163,7 @@ export default class extends Controller {
     onProgress(ms) {
         this.durationMs = ms;
         this.renderTimer(ms);
-        this.fillCells(Math.floor(ms / 1000));
+        this.renderProgress(Math.floor(ms / 1000));
         this.warningTarget.hidden = ms < WARN_MS;
 
         if (ms >= MAX_MS) {
@@ -179,7 +179,7 @@ export default class extends Controller {
 
         if (durationMs < MIN_MS) {
             this.blob = null;
-            this.fillCells(0);
+            this.renderProgress(0);
             this.show('idle');
             this.showMessage(`That was only ${Math.floor(durationMs / 1000)} seconds. A Speech needs at least 10 seconds — press Record to try again.`);
             return;
@@ -265,23 +265,17 @@ export default class extends Controller {
         this.messageTarget.hidden = true;
     }
 
-    // The five-minute grid: one cell per second recorded so far.
-    fillCells(seconds) {
-        if (seconds === this.filledSeconds) {
+    // The meter under the clock: how much of the five minutes has been used.
+    renderProgress(seconds) {
+        if (seconds === this.progressSeconds || !this.hasProgressTarget) {
             return;
         }
-        this.filledSeconds = seconds;
-        this.cellTargets.forEach((cell, index) => cell.toggleAttribute('data-filled', index < seconds));
+        this.progressSeconds = seconds;
+        this.progressTarget.style.setProperty('--done', `${Math.min(100, (seconds / (MAX_MS / 1000)) * 100)}%`);
     }
 
     renderTimer(ms) {
-        this.timerTarget.innerHTML = this.figure(`${this.formatTime(ms)} / 5:00`);
-    }
-
-    // Figures are set in the cell-built face; its ":" is drawn as two square cells by CSS (the
-    // same markup as templates/_figure.html.twig). The text is digits, ":" and "/" only.
-    figure(text) {
-        return text.replaceAll(':', '<span class="sep sep--colon"><span class="sr-only">:</span></span>');
+        this.timerTarget.textContent = `${this.formatTime(ms)} / 5:00`;
     }
 
     renderPlayButton(playing) {

@@ -1,0 +1,8 @@
+{# The top of every Speech page: when it was recorded, its length, its status and its title. #}
+{% set length = report|default(null) ? report.durationSeconds : speech.durationSeconds %}
+<p class="meta">
+    Recorded {{ speech.createdAt|date('j M Y, H:i') }}
+    {%- if length is not null %}{% set whole = length|round(0, 'floor') %} · <span data-stat="duration"><span data-value>{{ whole // 60 }}:{{ '%02d'|format(whole % 60) }}</span></span>{% endif %}
+    {% if speech.status.value != 'done' %}<span class="meta__status">{{ include('speech/_status_badge.html.twig', {status: speech.status}) }}</span>{% endif %}
+</p>
+<h1 class="title">{{ speech.title ?? 'Untitled Speech' }}</h1>

@@ -1,0 +1,16 @@
+{# A count drawn as tally marks: four strokes and a fifth across them, then the rest. Past `cap`
+   strokes it stops drawing and says how many more; the number beside it is always the count. #}
+{% set cap = cap|default(25) %}
+{% set drawn = min(count, cap) %}
+<span class="tally" aria-hidden="true">
+    {#- Twig ranges count down too (1..0 is [1, 0]), so empty ranges are guarded. -#}
+    {%- if drawn >= 5 -%}
+        {%- for gate in 1..(drawn // 5) -%}
+            <span class="tally__gate tally__gate--five"><i></i><i></i><i></i><i></i></span>
+        {%- endfor -%}
+    {%- endif -%}
+    {%- if drawn % 5 > 0 -%}
+        <span class="tally__gate">{% for n in 1..(drawn % 5) %}<i></i>{% endfor %}</span>
+    {%- endif -%}
+    {%- if count > cap %}<span class="tally__more">+{{ count - cap }}</span>{% endif -%}
+</span>

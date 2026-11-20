@@ -1,10 +1,7 @@
-{# Status is a cell fill plus its label, never colour alone: dashed, half, solid or crossed. #}
-{% set fills = {
-    pending: 'dashed',
-    transcribing: 'half',
-    analysing: 'half',
-    coaching: 'half',
-    done: 'solid',
-    failed: 'crossed',
-} %}
-<span data-speech-status class="status"><i class="c" data-fill="{{ fills[status.value] }}" aria-hidden="true"></i>{{ status.label }}</span>
+{# Status is an icon plus its label, never colour alone: a ring while waiting, three dots while
+   working, a tick when done, a cross when it failed. #}
+{% set state = {pending: 'waiting', transcribing: 'working', analysing: 'working', coaching: 'working', done: 'done', failed: 'failed'}[status.value] %}
+<span data-speech-status class="status" data-state="{{ state }}">
+    {{- include('_icon.html.twig', {name: state}) -}}
+    {{ status.label }}
+</span>

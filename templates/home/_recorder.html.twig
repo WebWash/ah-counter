@@ -1,37 +1,46 @@
-{# The recorder (SPEC §7, ticket 07): the plane with the page heading and the clock, and the work
-   area with the panels. Panels are switched by assets/controllers/recorder_controller.js. #}
-{% import '_figure.html.twig' as figures %}
-<section class="top" id="recorder"
+{# The recorder (SPEC §7, ticket 07): what the page is for on the left, the recorder on the right.
+   Panels are switched by assets/controllers/recorder_controller.js. #}
+<section class="sheet" id="recorder"
          aria-label="Recorder"
          data-controller="recorder"
          data-recorder-upload-url-value="{{ path('speech_upload') }}"
          data-recorder-csrf-token-value="{{ csrf_token(constant('App\\Controller\\SpeechController::UPLOAD_TOKEN_ID')) }}">
 
-    <header class="plane">
-        <h1><span class="sr-only">Ah Counter: </span>Record a short English speech and see every "um", "uh" and "you know" you said.</h1>
-        <div class="plane__clock">
-            <p class="plane__label">Length</p>
-            <p class="recorder__timer" aria-live="off"><span data-recorder-target="timer">{{ figures.figure('0:00 / 5:00') }}</span></p>
-        </div>
-    </header>
+    <div class="sheet__side">
+        <h1 class="lead"><span class="sr-only">Ah Counter: </span>Record a short English speech and see every "um", "uh" and "you know" you said.</h1>
+        <p class="lead__sub">Each Filler is counted, timed and played back, with Coaching for the next attempt.</p>
+    </div>
 
-    <div class="work recorder">
-        <div data-recorder-target="panel" data-panel="idle" class="recorder__idle">
+    <div class="sheet__main recorder">
+        <h2 class="heading">New Speech</h2>
+
+        <div data-recorder-target="panel" data-panel="idle" class="recorder__row">
             <button type="button" data-action="recorder#start" class="btn btn--big">
-                <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                    <path d="M12 15a3.5 3.5 0 0 0 3.5-3.5v-6a3.5 3.5 0 1 0-7 0v6A3.5 3.5 0 0 0 12 15Z"/>
-                    <path d="M18.5 11.5a.75.75 0 0 0-1.5 0 5 5 0 0 1-10 0 .75.75 0 0 0-1.5 0 6.5 6.5 0 0 0 5.75 6.46V20.5h-2.5a.75.75 0 0 0 0 1.5h6.5a.75.75 0 0 0 0-1.5h-2.5v-2.54a6.5 6.5 0 0 0 5.75-6.46Z"/>
-                </svg>
+                {{ include('_icon.html.twig', {name: 'mic'}) }}
                 Record
             </button>
             <p class="hint">Speak in English for 10 seconds to 5 minutes.</p>
         </div>
 
-        <div data-recorder-target="panel" data-panel="recording" hidden>
-            <button type="button" data-action="recorder#stop" class="btn btn--big">
-                <span class="stop-mark" aria-hidden="true"></span>
+        <div data-recorder-target="panel" data-panel="recording" hidden class="recorder__row">
+            <button type="button" data-action="recorder#stop" class="btn btn--big btn--stop">
+                {{ include('_icon.html.twig', {name: 'stop'}) }}
                 Stop
             </button>
+            <p class="recorder__live"><span class="recorder__dot" aria-hidden="true"></span>Recording</p>
+        </div>
+
+        {# The clock: time so far against the five-minute limit, with the last 30 seconds marked. #}
+        <div data-recorder-target="panel" data-panel="idle recording" class="clock">
+            <p class="clock__time" aria-live="off" data-recorder-target="timer">0:00 / 5:00</p>
+            <div class="clock__meter" aria-hidden="true">
+                <span class="clock__fill" data-recorder-target="progress"></span>
+                <span class="clock__warn"></span>
+            </div>
+            <p class="clock__scale" aria-hidden="true"><span>0:00</span><span>4:30</span><span>5:00</span></p>
+        </div>
+
+        <div data-recorder-target="panel" data-panel="recording" hidden>
             <p data-recorder-target="warning" hidden role="status" class="notice">
                 30 seconds left. Recording stops by itself at 5:00.
             </p>
@@ -41,25 +50,6 @@
             <div data-recorder-target="waveform" class="recorder__wave"></div>
         </div>
 
-        {# Five minutes drawn as 300 cells; the controller fills one a second while recording. #}
-        <div data-recorder-target="panel" data-panel="idle recording" class="mt-6">
-            <p class="label">Five minutes, one cell a second</p>
-            <div class="seconds seconds--clock" data-cols="30" aria-hidden="true">
-                <div class="seconds__lines">
-                    {% for decade in 0..29 %}
-                        <div class="decade">
-                            <span class="seconds__t">{{ (decade * 10) // 60 }}:{{ '%02d'|format((decade * 10) % 60) }}</span>
-                            <span class="seconds__cells">
-                                {%- for i in 0..9 -%}
-                                    <span class="cell cell--still{{ decade >= 27 ? ' cell--last' }}" data-recorder-target="cell"></span>
-                                {%- endfor -%}
-                            </span>
-                        </div>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-
         <div data-recorder-target="panel" data-panel="review" hidden class="recorder__review">
             <div class="recorder__row">
                 <button type="button"
@@ -67,27 +57,26 @@
                         data-action="recorder#togglePlayback"
                         aria-pressed="false"
                         class="btn btn--open">Play</button>
-                <p class="font-semibold">Length <span data-recorder-target="reviewDuration" class="text-2xl font-extrabold">0:00</span></p>
+                <p class="recorder__length">Length <b data-recorder-target="reviewDuration">0:00</b></p>
             </div>
 
-            <div>
-                <label for="speech-title" class="label">Title <span class="font-normal text-(--soft)">(optional)</span></label>
+            <div class="field-group">
+                <label for="speech-title" class="label">Title <span class="label__opt">(optional)</span></label>
                 <input id="speech-title" type="text" maxlength="120" autocomplete="off"
                        data-recorder-target="title"
                        data-action="keydown.enter->recorder#analyse"
                        placeholder="e.g. Icebreaker, club meeting 17 Nov"
-                       class="field mt-1.5">
+                       class="field">
             </div>
 
-            <div class="recorder__row recorder__row--end">
-                <button type="button" data-action="recorder#discard" class="btn btn--open">Discard</button>
+            <div class="recorder__row">
                 <button type="button" data-action="recorder#analyse" class="btn">Analyse</button>
+                <button type="button" data-action="recorder#discard" class="btn btn--open">Discard</button>
             </div>
         </div>
 
         <div data-recorder-target="panel" data-panel="uploading" hidden role="status">
-            <p class="state-title">Uploading your Speech…</p>
-            <div class="ticker mt-6" aria-hidden="true"></div>
+            <p class="state__title">Uploading your Speech…</p>
         </div>
 
         <p data-recorder-target="message" hidden role="alert" class="notice"></p>

@@ -1,5 +1,5 @@
 <section aria-labelledby="recent-speeches">
-    <h2 id="recent-speeches" class="label label--ruled">Your recent speeches</h2>
+    <h2 id="recent-speeches" class="heading">Your recent speeches</h2>
 
     {% if speeches is empty %}
         <p data-speech-list-empty class="empty">
@@ -10,17 +10,17 @@
             {% for speech in speeches %}
                 <li>
                     <a href="{{ path('speech_show', {id: speech.id}) }}">
-                        <div class="min-w-0">
-                            <p data-speech-title class="speeches__title">{{ speech.displayTitle }}</p>
-                            <p class="speeches__date">{{ speech.createdAt|date('j M Y, H:i') }}</p>
-                        </div>
-                        <p class="speeches__rate">
+                        <span class="speeches__name">
+                            <span data-speech-title class="speeches__title">{{ speech.displayTitle }}</span>
+                            {% if speech.title is not null %}<span class="speeches__date">{{ speech.createdAt|date('j M Y, H:i') }}</span>{% else %}<span class="speeches__date">Untitled Speech</span>{% endif %}
+                        </span>
+                        <span class="speeches__rate">
                             {% if speech.status.value == 'done' %}
                                 {% set report = reports[speech.id.toRfc4122] ?? null %}
-                                <span {% if report %}data-fillers-per-minute{% endif %}>{{ report ? report.fillersPerMinuteRounded|number_format(1) : '—' }}</span>
+                                <b {% if report %}data-fillers-per-minute{% endif %}>{{ report ? report.fillersPerMinuteRounded|number_format(1) : '—' }}</b>
                                 Fillers per minute
                             {% endif %}
-                        </p>
+                        </span>
                         {{ include('speech/_status_badge.html.twig', {status: speech.status}) }}
                     </a>
                 </li>

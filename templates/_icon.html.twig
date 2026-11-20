@@ -1,0 +1,21 @@
+{# The app's few icons, drawn on one 20px grid with a 2px stroke. Decorative: the label beside each
+   one carries the meaning. #}
+<svg class="icon" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    {%- if name == 'done' -%}
+        <path d="M4.5 10.5l3.5 3.5 7.5-8"/>
+    {%- elseif name == 'failed' -%}
+        <path d="M5.5 5.5l9 9M14.5 5.5l-9 9"/>
+    {%- elseif name == 'working' -%}
+        <path d="M4.5 10h.01M10 10h.01M15.5 10h.01" stroke-width="3.2"/>
+    {%- elseif name == 'waiting' -%}
+        <circle cx="10" cy="10" r="6"/>
+    {%- elseif name == 'play' -%}
+        <path d="M6.5 4.5v11l9-5.5z" fill="currentColor"/>
+    {%- elseif name == 'pause' -%}
+        <path d="M7 4.5v11M13 4.5v11" stroke-width="3"/>
+    {%- elseif name == 'mic' -%}
+        <rect x="7" y="2.5" width="6" height="10" rx="3"/><path d="M4.5 9.5a5.5 5.5 0 0 0 11 0M10 15v2.5"/>
+    {%- elseif name == 'stop' -%}
+        <rect x="5" y="5" width="10" height="10" rx="1.5" fill="currentColor"/>
+    {%- endif -%}
+</svg>

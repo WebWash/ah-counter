@@ -1,1211 +1,1207 @@
 @import "tailwindcss";
 
 /*
- * Seconds Grid: the visual system for Ah Counter (see DESIGN.md).
- * White paper under a faint blue construction grid, one orange-red plane, ink rules, square
- * corners. State is a cell fill, never colour alone: solid, diagonal half, or dashed.
+ * Tally Sheet: the visual system for Ah Counter (see DESIGN.md).
+ * A white page with form-blue print, ink text and a yellow highlighter. Fillers are counted in
+ * words and tally marks. A Filler Sound is highlighted solid, a Filler Phrase underlined, and a
+ * Candidate that was not counted gets a dotted underline: the kinds never depend on colour alone.
  */
 
 @font-face {
-    font-family: "Hanken Grotesk";
-    src: url("../fonts/hanken-grotesk-latin-wght.woff2") format("woff2");
-    font-weight: 100 900;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: "Doto";
-    src: url("../fonts/doto-latin-wght.woff2") format("woff2");
+    font-family: "Public Sans";
+    src: url("../fonts/public-sans-latin-wght.woff2") format("woff2");
     font-weight: 100 900;
     font-display: swap;
 }
 
 :root {
     --paper: #fff;
-    --ink: #111;
-    --soft: #4d4d4d;
-    --grid: #c9d8f2;
-    --played: #dfe8f8;
-    --plane: #e8401c;
-    --plane-tint: #ffe1d6;
-    --off: #8c8c8c;
-    --u: 24px;
-    --gutter: 48px;
-    --font-text: "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;
-    --font-figure: "Doto", ui-monospace, monospace;
+    --ink: #15181d;
+    --soft: #545b66;
+    --blue: #1f4fa0;
+    --blue-dark: #173d7d;
+    --blue-tint: #edf2fa;
+    --rule: #d5deee;
+    --hl: #ffe066;
+    --hl-soft: #fff5c9;
+    --hl-edge: #c9a400;
+    --danger: #b3261e;
+    --danger-tint: #fbeeed;
+
+    --side: 500px;
+    --gutter: 64px;
+    --gap: 72px;
+    --radius: 6px;
+
+    color-scheme: light;
+    accent-color: var(--blue);
+    scrollbar-color: var(--rule) var(--paper);
 }
 
-@layer base {
-    html {
-        background: var(--paper);
-        color: var(--ink);
-        font-family: var(--font-text);
-        font-size: 16px;
-        line-height: 24px;
-        font-variant-numeric: tabular-nums;
-        caret-color: var(--plane);
-        scrollbar-color: var(--ink) var(--paper);
-    }
+/* ---------------------------------------------------------------- base */
 
-    ::selection {
-        background: var(--ink);
-        color: var(--paper);
-    }
-
-    :focus-visible {
-        outline: 3px solid var(--ink);
-        outline-offset: 3px;
-    }
-
-    a {
-        text-underline-offset: 3px;
-    }
+html {
+    scroll-padding-top: 24px;
 }
 
-@layer components {
-    /* --- Shell --------------------------------------------------------------------------- */
-
-    .frame {
-        max-width: 1440px;
-        min-height: 100vh;
-        margin-inline: auto;
-        display: flex;
-        flex-direction: column;
-        /* The construction grid starts at the frame's corner, so modules can sit on its lines. */
-        background:
-            linear-gradient(var(--grid) 1px, transparent 1px) 0 0 / var(--u) var(--u),
-            linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0 / var(--u) var(--u),
-            var(--paper);
-    }
-
-    @media (min-width: 1442px) {
-        .frame {
-            border-inline: 2px solid var(--ink);
-        }
-    }
-
-    .bar {
-        min-height: 48px;
-        display: flex;
-        align-items: center;
-        gap: 36px;
-        padding-inline: var(--gutter);
-        background: var(--paper);
-        border-bottom: 2px solid var(--ink);
-    }
-
-    .bar__mark {
-        font-weight: 800;
-        font-size: 20px;
-        letter-spacing: -0.02em;
-        text-decoration: none;
-        white-space: nowrap;
-    }
-
-    .bar .btn {
-        white-space: nowrap;
-    }
-
-    .bar__link {
-        font-weight: 600;
-        color: var(--soft);
-        text-decoration: none;
-        padding-block: 12px;
-    }
-
-    .bar__link:hover,
-    .bar__link[aria-current="page"] {
-        color: var(--ink);
-        box-shadow: inset 0 -3px 0 var(--ink);
-    }
-
-    .bar__action {
-        margin-left: auto;
-    }
-
-    .top {
-        display: grid;
-        grid-template-columns: minmax(0, 600px) minmax(0, 1fr);
-        border-bottom: 2px solid var(--ink);
-    }
-
-    /* A Speech page with no Report yet: the plane and the work area fill the screen. */
-    .top--fill {
-        flex: 1;
-        border-bottom: 0;
-    }
-
-    .plane {
-        background: var(--plane);
-        padding: 48px var(--gutter);
-    }
-
-    .plane h1 {
-        font-weight: 800;
-        font-size: 44px;
-        line-height: 48px;
-        letter-spacing: -0.03em;
-        text-wrap: balance;
-        overflow-wrap: anywhere;
-    }
-
-    .plane__meta {
-        margin-top: 12px;
-        font-weight: 600;
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: 6px 16px;
-    }
-
-    .plane__back {
-        display: inline-block;
-        margin-bottom: 24px;
-        font-weight: 600;
-    }
-
-    .work {
-        padding: 24px 24px 48px 72px;
-        min-width: 0;
-    }
-
-    .work > * {
-        max-width: 720px;
-    }
-
-    .plane__clock {
-        margin-top: 48px;
-    }
-
-    .plane__label {
-        font-weight: 600;
-        font-size: 14px;
-    }
-
-    .sheet {
-        flex: 1;
-        background: var(--paper);
-        padding: 24px var(--gutter) 72px;
-    }
-
-    .label {
-        font-weight: 800;
-        font-size: 15px;
-        line-height: 24px;
-    }
-
-    .work__head {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: space-between;
-        gap: 4px 24px;
-    }
-
-    .actions {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: flex-start;
-        gap: 12px 24px;
-        margin-top: 24px;
-    }
-
-    .label--ruled {
-        padding-bottom: 10px;
-        border-bottom: 2px solid var(--ink);
-    }
-
-    .hint {
-        color: var(--soft);
-        font-size: 15px;
-        max-width: 68ch;
-    }
-
-    /* --- Figures --------------------------------------------------------------------------- */
-
-    .figure {
-        font-family: var(--font-figure);
-        font-weight: 900;
-        letter-spacing: -0.04em;
-    }
-
-    .figs {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 24px;
-        margin-top: 36px;
-    }
-
-    .figs dt {
-        font-weight: 600;
-        font-size: 14px;
-    }
-
-    .figs dd {
-        display: flex;
-        align-items: baseline;
-        font-family: var(--font-figure);
-        font-weight: 900;
-        font-size: 72px;
-        line-height: 72px;
-        letter-spacing: -0.04em;
-    }
-
-    /* The most frequent Filler Type is a word, not a figure, so it is set in the text face. */
-    .figs [data-stat="top-type"] dd {
-        display: block;
-        font-family: var(--font-text);
-        font-weight: 800;
-        font-size: 44px;
-        letter-spacing: -0.03em;
-        overflow-wrap: anywhere;
-        /* Seats the word on the same baseline as the figure beside it. */
-        translate: 0 11px;
-    }
-
-    /* "." and ":" inside a figure, drawn as square cells (see templates/_figure.html.twig). */
-    .sep {
-        position: relative;
-        display: inline-block;
-        flex: none;
-        width: 0.29em;
-        height: 0.5em;
-    }
-
-    .sep::before {
-        content: "";
-        position: absolute;
-        left: 50%;
-        bottom: 0;
-        width: 0.085em;
-        height: 0.085em;
-        translate: -50% 0;
-        background: currentColor;
-    }
-
-    .sep--colon::before {
-        bottom: 0.096em;
-        box-shadow: 0 -0.288em 0 currentColor;
-    }
-
-    /* --- Controls -------------------------------------------------------------------------- */
-
-    .btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 12px;
-        min-height: 48px;
-        padding: 10px 24px;
-        background: var(--ink);
-        color: var(--paper);
-        border: 2px solid var(--ink);
-        font-weight: 800;
-        text-decoration: none;
-        cursor: pointer;
-        transition: background-color 120ms steps(2), color 120ms steps(2);
-    }
-
-    .btn:hover {
-        background: var(--plane);
-        color: var(--ink);
-    }
-
-    .btn:active {
-        background: var(--paper);
-        color: var(--ink);
-    }
-
-    .btn--small {
-        min-height: 36px;
-        padding: 4px 18px;
-    }
-
-    .btn--open {
-        background: var(--paper);
-        color: var(--ink);
-    }
-
-    .btn--open:hover {
-        background: var(--ink);
-        color: var(--paper);
-    }
-
-    .btn--big {
-        min-height: 72px;
-        padding-inline: 36px;
-        font-size: 20px;
-        letter-spacing: -0.01em;
-    }
-
-    .btn--confirm {
-        background: var(--plane);
-        color: var(--ink);
-    }
-
-    .btn--confirm:hover {
-        background: var(--ink);
-        color: var(--paper);
-    }
-
-    .field {
-        display: block;
-        width: 100%;
-        min-height: 48px;
-        padding: 10px 14px;
-        background: var(--paper);
-        border: 2px solid var(--ink);
-        font-size: 16px;
-    }
-
-    .field::placeholder {
-        color: #666;
-    }
-
-    /* 48px tall for one line (and 24 more per extra line), so what follows stays on the grid. */
-    .notice {
-        margin-top: 24px;
-        padding: 10px 16px;
-        border: 2px solid var(--ink);
-        background: var(--plane-tint);
-        font-weight: 600;
-        max-width: 68ch;
-    }
-
-    .confirm {
-        margin-top: 12px;
-        padding: 16px;
-        border: 2px solid var(--ink);
-        background: var(--paper);
-        max-width: 26rem;
-    }
-
-    .confirm .btn {
-        margin-top: 12px;
-    }
-
-    details > summary {
-        list-style: none;
-    }
-
-    details > summary::-webkit-details-marker {
-        display: none;
-    }
-
-    /* --- Cells: the state vocabulary ------------------------------------------------------- */
-
-    .c {
-        display: inline-block;
-        flex: none;
-        width: 16px;
-        height: 16px;
-        border: 2px solid var(--ink);
-        background: var(--paper);
-        vertical-align: -2px;
-    }
-
-    .c[data-fill="solid"] {
-        background: var(--ink);
-    }
-
-    .c[data-fill="half"] {
-        background: linear-gradient(135deg, var(--ink) 50%, var(--paper) 50%);
-    }
-
-    .c[data-fill="dashed"] {
-        border-style: dashed;
-        border-color: var(--off);
-    }
-
-    .c[data-fill="crossed"] {
-        background:
-            linear-gradient(45deg, transparent 43%, var(--ink) 43% 57%, transparent 57%),
-            linear-gradient(-45deg, transparent 43%, var(--ink) 43% 57%, transparent 57%),
-            var(--plane);
-    }
-
-    .key {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 4px 20px;
-        font-weight: 600;
-        font-size: 14px;
-        color: var(--soft);
-    }
-
-    .key .c {
-        margin-right: 6px;
-    }
-
-    .status {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        font-weight: 600;
-        font-size: 14px;
-        white-space: nowrap;
-    }
-
-    /* --- The seconds grid ------------------------------------------------------------------ */
-
-    .seconds {
-        --cols: 10;
-        --cell: 48px;
-        --label: 0px;
-        --per-line: 1;
-        margin-top: 24px;
-        container-type: inline-size;
-    }
-
-    .seconds[data-cols="20"] {
-        --per-line: 2;
-    }
-
-    .seconds[data-cols="30"] {
-        --per-line: 3;
-    }
-
-    /* Cells are a whole number of pixels wide, at most --cell, so every grid line stays crisp;
-       at full width they are 24 or 48px and sit on the construction grid. */
-    .seconds__lines {
-        --size: round(down, min(var(--cell), (100cqi - var(--label)) / var(--cols)), 1px);
-        display: grid;
-        grid-template-columns: repeat(var(--per-line), max-content);
-    }
-
-    /* Ten seconds of cells. Its time label hangs in the work column's left margin. */
-    .decade {
-        position: relative;
-        display: flex;
-        align-items: center;
-        height: var(--size);
-    }
-
-    .seconds__t {
-        position: absolute;
-        right: 100%;
-        margin-right: 12px;
-        font-weight: 800;
-        line-height: 1;
-        white-space: nowrap;
-    }
-
-    /* Only the first ten seconds of each line carry a label. */
-    .seconds[data-cols="20"] .decade:nth-child(2n) .seconds__t,
-    .seconds[data-cols="30"] .decade:not(:nth-child(3n + 1)) .seconds__t {
-        display: none;
-    }
-
-    .seconds__cells {
-        display: grid;
-        grid-template-columns: repeat(10, var(--size));
-    }
-
-    .cell {
-        position: relative;
-        z-index: 1;
-        display: block;
-        height: calc(var(--size) + 1px);
-        margin: 0 -1px -1px 0;
-        padding: 0;
-        border: 1px solid var(--ink);
-        background: var(--paper);
-        cursor: pointer;
-    }
-
-    .cell:hover {
-        background: var(--plane-tint);
-    }
-
-    .cell[data-played] {
-        background: var(--played);
-    }
-
-    .cell[data-kind="sound"] {
-        background: var(--ink);
-    }
-
-    .cell[data-kind="phrase"] {
-        background: linear-gradient(135deg, var(--ink) 50%, var(--paper) 50%);
-    }
-
-    .cell[data-kind="mixed"] {
-        background: linear-gradient(135deg, var(--ink) 38%, var(--paper) 38% 62%, var(--ink) 62%);
-    }
-
-    /* A hairline of paper inside each Filler cell, so neighbouring Fillers stay separate cells. */
-    .cell[data-kind] {
-        box-shadow: inset 0 0 0 2px var(--paper);
-    }
-
-    .cell[data-kind]:hover,
-    .cell[data-current] {
-        z-index: 2;
-        box-shadow: inset 0 0 0 4px var(--plane);
-    }
-
-    .cell:focus-visible {
-        z-index: 3;
-    }
-
-    .cell--off {
-        z-index: 0;
-        border: 1px dashed var(--off);
-        background: none;
-        cursor: default;
-    }
-
-    .cell--off:hover {
-        background: none;
-    }
-
-    .cell[data-filled] {
-        background: var(--ink);
-        box-shadow: inset 0 0 0 2px var(--paper);
-    }
-
-    .cell--last[data-filled] {
-        background: var(--plane);
-    }
-
-    /* Cells that show time passing or waiting; they are not controls. */
-    .cell--still {
-        pointer-events: none;
-    }
-
-    /* While a Speech is processed, one lit cell steps across its grid. */
-    @media (prefers-reduced-motion: no-preference) {
-        .cell--sweep {
-            animation: sweep var(--sweep, 6s) steps(1) infinite;
-            animation-delay: calc(var(--i) * 0.1s);
-        }
-    }
-
-    @keyframes sweep {
-        0% { background: var(--ink); }
-        4% { background: var(--paper); }
-        100% { background: var(--paper); }
-    }
-
-    .transport {
-        display: flex;
-        align-items: center;
-        gap: 24px;
-        margin-top: 24px;
-    }
-
-    .transport__wave {
-        flex: 1;
-        min-width: 0;
-        min-height: 48px;
-        overflow: hidden;
-    }
-
-    .transport__time {
-        font-weight: 800;
-        white-space: nowrap;
-    }
-
-    /* Ten cells that fill one a second while something is being worked on. */
-    .ticker {
-        position: relative;
-        width: min(100%, 480px);
-        aspect-ratio: 10;
-        border: 1px solid var(--ink);
-        background: var(--paper);
-        overflow: hidden;
-    }
-
-    .ticker::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background: var(--ink);
-        transform-origin: left;
-        transform: scaleX(0.3);
-    }
-
-    .ticker::after {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background: repeating-linear-gradient(90deg, transparent 0 calc(10% - 1px), #fff calc(10% - 1px) 10%);
-        mix-blend-mode: difference;
-    }
-
-    @media (prefers-reduced-motion: no-preference) {
-        .ticker::before {
-            animation: tick 10s steps(10, jump-start) infinite;
-        }
-    }
-
-    @keyframes tick {
-        from { transform: scaleX(0); }
-        to { transform: scaleX(1); }
-    }
-
-    /* --- Report body ----------------------------------------------------------------------- */
-
-    .report {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) minmax(0, 432px);
-        grid-template-rows: auto 1fr;
-        gap: 48px;
-        align-items: start;
-    }
-
-    /* The side column runs beside both the Filler list and the Transcript. */
-    .report__side {
-        grid-column: 2;
-        grid-row: 1 / span 2;
-        display: grid;
-        gap: 36px;
-    }
-
-    .report__main {
-        grid-column: 1;
-    }
-
-    .report__wide {
-        grid-column: 1 / -1;
-    }
-
-    .rows {
-        width: 100%;
-        border-collapse: collapse;
-        text-align: left;
-    }
-
-    .rows th {
-        padding: 8px 8px 7px;
-        font-size: 14px;
-        font-weight: 600;
-        color: var(--soft);
-        border-bottom: 1px solid var(--grid);
-    }
-
-    .rows td {
-        padding: 11px 8px 12px;
-        border-bottom: 1px solid var(--grid);
-        vertical-align: top;
-    }
-
-    .rows tbody tr {
-        cursor: pointer;
-    }
-
-    .rows tbody tr:hover td,
-    .rows tbody tr[data-current] td {
-        background: var(--plane-tint);
-    }
-
-    .rows td:first-child {
-        width: 72px;
-    }
-
-    .rows td:nth-child(2) {
-        width: 168px;
-        font-weight: 600;
-        white-space: nowrap;
-    }
-
-    .rows .c {
-        margin-right: 8px;
-    }
-
-    .rows td strong {
-        font-weight: 800;
-    }
-
-    .timelink {
-        font-weight: 800;
-        text-decoration: underline;
-        text-underline-offset: 3px;
-        cursor: pointer;
-    }
-
-    .timelink:hover {
-        background: var(--ink);
-        color: var(--paper);
-    }
-
-    .types {
-        margin-top: 12px;
-        display: grid;
-        gap: 6px;
-    }
-
-    .types li {
-        display: grid;
-        grid-template-columns: 7.5rem minmax(0, 1fr) 3rem;
-        align-items: start;
-        gap: 12px;
-        font-weight: 600;
-    }
-
-    /* One cell per Filler. */
-    .types__run {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 4px;
-        padding-block: 4px;
-    }
-
-    .types [data-count] {
-        font-weight: 800;
-        font-size: 20px;
-        text-align: right;
-    }
-
-
-    .coaching__summary {
-        margin-top: 12px;
-        font-size: 20px;
-        line-height: 28px;
-    }
-
-    .coaching h3 {
-        margin-top: 20px;
-        font-weight: 800;
-        font-size: 14px;
-    }
-
-    .coaching ul {
-        margin-top: 6px;
-        padding-left: 20px;
-        list-style: square;
-        display: grid;
-        gap: 6px;
-    }
-
-    .praise {
-        border: 2px solid var(--ink);
-        padding: 24px;
-    }
-
-    .praise h2 {
-        font-weight: 800;
-        font-size: 28px;
-        line-height: 36px;
-        letter-spacing: -0.02em;
-    }
-
-    .praise p {
-        margin-top: 6px;
-    }
-
-    .transcript {
-        margin-top: 12px;
-        font-size: 20px;
-        line-height: 40px;
-        max-width: 68ch;
-    }
-
-    .w {
-        padding: 2px 1px;
-        cursor: pointer;
-    }
-
-    .w:hover {
-        background: var(--plane-tint);
-    }
-
-    .w[data-current] {
-        background: var(--plane-tint);
-        box-shadow: 0 3px 0 var(--plane);
-    }
-
-    .w[data-verdict="filler"] {
-        font-weight: 700;
-        padding: 2px 7px;
-        margin-inline: 1px;
-        border: 2px solid var(--ink);
-    }
-
-    .w[data-verdict="filler"][data-kind="sound"] {
-        background: var(--ink);
-        color: var(--paper);
-    }
-
-    .w[data-verdict="filler"][data-kind="phrase"] {
-        background: var(--paper);
-    }
-
-    .w[data-verdict="filler"][data-kind="phrase"]::before {
-        content: "";
-        display: inline-block;
-        width: 0.7em;
-        height: 0.7em;
-        margin-right: 7px;
-        border: 2px solid var(--ink);
-        background: linear-gradient(135deg, var(--ink) 50%, var(--paper) 50%);
-    }
-
-    .w[data-verdict="filler"]:hover,
-    .w[data-verdict="filler"][data-current] {
-        box-shadow: 0 0 0 4px var(--plane);
-    }
-
-    .w[data-verdict="not_filler"],
-    .w[data-verdict="unjudged"] {
-        color: var(--soft);
-        text-decoration: underline dashed;
-        text-decoration-thickness: 2px;
-        text-underline-offset: 7px;
-    }
-
-    .notes {
-        margin-top: 4px;
-    }
-
-    .notes li {
-        display: grid;
-        grid-template-columns: 56px minmax(0, 1fr);
-        gap: 8px;
-        padding: 11px 0 12px;
-        border-bottom: 1px solid var(--grid);
-    }
-
-    .notes b {
-        font-weight: 800;
-    }
-
-    .notes span span {
-        display: block;
-        color: var(--soft);
-    }
-
-    /* --- Processing ------------------------------------------------------------------------ */
-
-    .steps {
-        margin-top: 48px;
-        display: grid;
-        gap: 24px;
-        max-width: 480px;
-    }
-
-    /* Each step is a 48px cell on the construction grid, with a 24px line between steps. */
-    .steps li {
-        display: flex;
-        align-items: center;
-        gap: 24px;
-        font-size: 20px;
-        font-weight: 600;
-        color: var(--soft);
-    }
-
-    .steps li[data-step-state="complete"],
-    .steps li[data-step-state="current"] {
-        color: var(--ink);
-    }
-
-    .steps li[data-step-state="current"] {
-        font-weight: 800;
-    }
-
-    .steps .c {
-        width: 48px;
-        height: 48px;
-        border-width: 1px;
-    }
-
-    .steps small {
-        margin-left: auto;
-        font-size: 14px;
-        font-weight: 600;
-    }
-
-    .state-title {
-        padding-bottom: 12px;
-        font-weight: 800;
-        font-size: 28px;
-        line-height: 36px;
-        letter-spacing: -0.02em;
-        text-wrap: balance;
-    }
-
-    /* --- Recorder -------------------------------------------------------------------------- */
-
-    .recorder__idle {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: 12px 24px;
-    }
-
-    .recorder__timer {
-        font-family: var(--font-figure);
-        font-weight: 900;
-        font-size: 72px;
-        line-height: 72px;
-        letter-spacing: -0.04em;
-    }
-
-    .recorder__wavepanel {
-        margin-top: 24px;
-    }
-
-    .recorder__wave {
-        min-height: 72px;
-        margin-bottom: 24px;
-        border-block: 1px solid var(--ink);
-        overflow: hidden;
-        background: var(--paper);
-    }
-
-    .recorder__review {
-        display: grid;
-        gap: 24px;
-        max-width: 720px;
-    }
-
-    .recorder__row {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: 12px 24px;
-    }
-
-    .recorder__row--end {
-        justify-content: flex-end;
-    }
-
-    .seconds--clock {
-        --cols: 30;
-        --cell: 24px;
-    }
-
-    .seconds--clock .seconds__t {
-        font-size: 14px;
-        color: var(--soft);
-    }
-
-    .stop-mark {
-        width: 20px;
-        height: 20px;
-        background: currentColor;
-    }
-
-    /* --- Speech list ----------------------------------------------------------------------- */
-
-    .speeches {
-        margin-top: 0;
-    }
-
-    .speeches a {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) 9rem 8rem;
-        align-items: center;
-        gap: 24px;
-        padding: 11px 8px 12px;
-        border-bottom: 1px solid var(--grid);
-        text-decoration: none;
-    }
-
-    .speeches a:hover {
-        background: var(--plane-tint);
-    }
-
-    .speeches__title {
-        font-weight: 800;
-        font-size: 20px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-
-    .speeches__date {
-        color: var(--soft);
-        font-size: 14px;
-    }
-
-    .speeches__rate {
-        text-align: right;
-        font-size: 14px;
-        color: var(--soft);
-        line-height: 18px;
-    }
-
-    /* The cell-built face is for headline figures; at list size the text face reads better. */
-    .speeches__rate span {
-        display: block;
-        font-weight: 800;
-        font-size: 28px;
-        line-height: 32px;
-        letter-spacing: -0.02em;
-        color: var(--ink);
-    }
-
-    .empty {
-        margin-top: 24px;
-        padding: 36px 24px;
-        border: 1px dashed var(--off);
-        color: var(--soft);
-        max-width: 68ch;
-    }
-
-    /* --- Narrow screens -------------------------------------------------------------------- */
-
-    @media (max-width: 1000px) {
-        .top,
-        .report {
-            grid-template-columns: minmax(0, 1fr);
-        }
-
-        .report__side {
-            grid-column: 1;
-            grid-row: auto;
-        }
-
-        .report {
-            gap: 36px;
-        }
-
-        .plane {
-            padding-block: 32px;
-        }
-
-        .plane h1 {
-            font-size: 28px;
-            line-height: 36px;
-        }
-
-        .work {
-            padding: 24px var(--gutter) 32px;
-        }
-
-        /* No margin to hang labels in: they sit in a column before the cells. */
-        .seconds {
-            --label: 52px;
-        }
-
-        .seconds__t {
-            position: static;
-            flex: none;
-            width: var(--label);
-            margin: 0;
-        }
-
-        .bar {
-            gap: 20px;
-        }
-    }
-
-    @media (max-width: 560px) {
-        .figs dd {
-            font-size: 56px;
-            line-height: 60px;
-        }
-
-        .recorder__timer {
-            font-size: 56px;
-            line-height: 60px;
-        }
-
-        .figs [data-stat="top-type"] dd {
-            font-size: 28px;
-            translate: 0 9px;
-        }
-
-        .transport {
-            flex-wrap: wrap;
-            gap: 12px 16px;
-        }
-
-        .transport__wave {
-            order: 3;
-            flex-basis: 100%;
-        }
-
-        .rows td:nth-child(2) {
-            width: auto;
-            white-space: normal;
-        }
-
-        .rows td:first-child {
-            width: 56px;
-        }
-
-        .speeches a {
-            grid-template-columns: minmax(0, 1fr) auto;
-            gap: 4px 16px;
-        }
-
-        .speeches .status {
-            grid-column: 1 / -1;
-        }
-
-        /* A Report's grid drops to ten cells a line on a phone, so a Filler's fill stays
-           readable; the grid grows taller instead. */
-        .seconds:not(.seconds--clock) {
-            --cols: 10 !important;
-            --cell: 48px !important;
-            --per-line: 1;
-        }
-
-        .seconds:not(.seconds--clock)[data-cols] .decade .seconds__t {
-            display: block;
-        }
-
-        /* The recorder's clock keeps thirty small cells a line; label every other line. */
-        .seconds--clock {
-            --label: 40px;
-        }
-
-        .seconds--clock .seconds__t {
-            font-size: 14px;
-        }
-
-        .seconds--clock .decade:nth-child(6n + 4) .seconds__t {
-            visibility: hidden;
-            display: block;
-        }
-
-        /* Play stays in reach while a tall grid scrolls past. */
-        .transport {
-            position: sticky;
-            bottom: 0;
-            z-index: 5;
-            margin-inline: calc(var(--gutter) * -1);
-            padding: 12px var(--gutter);
-            background: var(--paper);
-            border-top: 2px solid var(--ink);
-        }
-
-        .bar {
-            gap: 14px;
-        }
-
-        .bar__mark {
-            font-size: 16px;
-        }
-
-        .bar .btn--small {
-            padding-inline: 12px;
-        }
-
-        .btn--big {
-            width: 100%;
-        }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-        .btn {
-            transition: none;
-        }
+body {
+    min-height: 100vh;
+    background: var(--paper);
+    color: var(--ink);
+    font: 400 17px/1.5 "Public Sans", ui-sans-serif, system-ui, sans-serif;
+    font-variant-numeric: tabular-nums;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+::selection {
+    background: var(--hl);
+    color: var(--ink);
+}
+
+input,
+textarea {
+    caret-color: var(--blue);
+}
+
+a {
+    text-underline-offset: 3px;
+}
+
+:focus-visible {
+    outline: 3px solid var(--blue);
+    outline-offset: 3px;
+    border-radius: 2px;
+}
+
+.skip {
+    position: absolute;
+    left: 16px;
+    top: -60px;
+    z-index: 30;
+    background: var(--paper);
+    color: var(--blue);
+    font-weight: 800;
+    padding: 8px 16px;
+    border-radius: var(--radius);
+}
+
+.skip:focus {
+    top: 10px;
+}
+
+.icon {
+    flex: none;
+    width: 20px;
+    height: 20px;
+}
+
+/* ---------------------------------------------------------------- top bar */
+
+.bar {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    height: 60px;
+    padding: 0 var(--gutter);
+    background: var(--blue);
+    color: var(--paper);
+}
+
+.bar__mark {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 21px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    text-decoration: none;
+}
+
+.bar__link {
+    color: #d6e2f7;
+    font-weight: 600;
+    text-decoration: none;
+    padding: 6px 0;
+}
+
+.bar__link:hover,
+.bar__link[aria-current="page"] {
+    color: var(--paper);
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 8px;
+}
+
+.bar__mark:focus-visible,
+.bar__link:focus-visible,
+.btn--bar:focus-visible {
+    outline-color: var(--paper);
+}
+
+/* ---------------------------------------------------------------- page */
+
+.page {
+    display: block;
+}
+
+/* Two columns: what the page says on the left, the work on the right. */
+.sheet {
+    display: grid;
+    grid-template-columns: minmax(0, var(--side)) minmax(0, 1fr);
+    gap: var(--gap);
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 40px var(--gutter) 72px;
+}
+
+.sheet__side,
+.sheet__main {
+    min-width: 0;
+}
+
+.sheet__main > section + section,
+.sheet__side > section {
+    margin-top: 40px;
+}
+
+.heading {
+    color: var(--blue);
+    font-size: 18px;
+    font-weight: 800;
+    line-height: 1.4;
+    padding-bottom: 6px;
+    border-bottom: 2px solid var(--blue);
+    margin-bottom: 12px;
+}
+
+.hint {
+    color: var(--soft);
+    font-size: 16px;
+    max-width: 68ch;
+}
+
+.notice {
+    max-width: 68ch;
+    margin-top: 16px;
+    padding: 12px 16px;
+    background: var(--blue-tint);
+    border: 1px solid var(--blue);
+    border-radius: var(--radius);
+    font-weight: 600;
+}
+
+.notice[role="alert"] {
+    background: var(--danger-tint);
+    border-color: var(--danger);
+}
+
+.empty {
+    padding: 24px;
+    border: 2px dashed var(--rule);
+    border-radius: 8px;
+    color: var(--soft);
+}
+
+/* ---------------------------------------------------------------- Speech heading */
+
+.meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    column-gap: 6px;
+    color: var(--soft);
+}
+
+.meta__status {
+    margin-left: 10px;
+}
+
+.title {
+    margin-top: 2px;
+    font-size: 20px;
+    font-weight: 800;
+    line-height: 1.3;
+    text-wrap: balance;
+}
+
+/* The count, said as a sentence. */
+.summary {
+    margin-top: 20px;
+    font-size: 56px;
+    font-weight: 800;
+    line-height: 1.08;
+    letter-spacing: -0.025em;
+    text-wrap: balance;
+}
+
+.facts {
+    margin-top: 12px;
+    font-size: 22px;
+    line-height: 1.4;
+}
+
+.facts b {
+    font-weight: 800;
+}
+
+.summary__tally {
+    margin-top: 24px;
+}
+
+.summary__tally .tally {
+    --stroke: var(--ink);
+    --tall: 40px;
+}
+
+/* ---------------------------------------------------------------- tally marks */
+
+.tally {
+    --stroke: var(--blue);
+    --tall: 34px;
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 20px;
+}
+
+.tally__gate {
+    position: relative;
+    display: inline-flex;
+    gap: 8px;
+    height: var(--tall);
+}
+
+.tally__gate i {
+    display: block;
+    width: 4px;
+    height: var(--tall);
+    background: var(--stroke);
+    border-radius: 2px;
+    transform-origin: 50% 100%;
+    transform: rotate(3deg);
+    animation: stroke-in 260ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+.tally__gate i:nth-child(2n) {
+    height: calc(var(--tall) - 2px);
+    margin-top: 2px;
+    transform: rotate(-2deg);
+}
+
+.tally__gate i:nth-child(2) { animation-delay: 60ms; }
+.tally__gate i:nth-child(3) { animation-delay: 120ms; }
+.tally__gate i:nth-child(4) { animation-delay: 180ms; }
+
+/* The fifth stroke, across the other four. */
+.tally__gate--five::after {
+    content: "";
+    position: absolute;
+    left: -7px;
+    right: -7px;
+    top: calc(50% - 2px);
+    height: 4px;
+    background: var(--stroke);
+    border-radius: 2px;
+    transform: rotate(-22deg);
+    animation: strike-in 220ms cubic-bezier(0.16, 1, 0.3, 1) 240ms backwards;
+}
+
+.tally__more {
+    color: var(--soft);
+    font-weight: 800;
+}
+
+@keyframes stroke-in {
+    from { transform: scaleY(0.15); }
+}
+
+@keyframes strike-in {
+    from { transform: rotate(-22deg) scaleX(0); }
+}
+
+/* Tallies per Filler Type. */
+.tallies li {
+    display: grid;
+    grid-template-columns: 140px minmax(0, 1fr) 48px;
+    align-items: center;
+    gap: 12px;
+    min-height: 60px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--rule);
+}
+
+.tallies__word {
+    font-size: 20px;
+    font-weight: 800;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+}
+
+.tallies__word small {
+    display: block;
+    margin-top: 2px;
+    color: var(--soft);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.tallies__count {
+    text-align: right;
+    font-size: 22px;
+    font-weight: 800;
+}
+
+/* ---------------------------------------------------------------- Coaching */
+
+.coaching__summary {
+    font-size: 20px;
+    line-height: 1.45;
+    max-width: 60ch;
+}
+
+.coaching h3 {
+    margin-top: 20px;
+    font-size: 16px;
+    font-weight: 800;
+}
+
+.coaching ul {
+    margin-top: 6px;
+    padding-left: 22px;
+    list-style: disc;
+}
+
+.coaching li {
+    margin-top: 6px;
+    max-width: 60ch;
+}
+
+.coaching li::marker {
+    color: var(--blue);
+}
+
+.praise p {
+    font-size: 20px;
+    line-height: 1.45;
+}
+
+/* ---------------------------------------------------------------- buttons */
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 48px;
+    padding: 0 22px;
+    border: 2px solid var(--blue);
+    border-radius: var(--radius);
+    background: var(--blue);
+    color: var(--paper);
+    font-size: 17px;
+    font-weight: 800;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 120ms ease-out, border-color 120ms ease-out, color 120ms ease-out;
+}
+
+.btn:hover {
+    background: var(--blue-dark);
+    border-color: var(--blue-dark);
+}
+
+.btn:active {
+    transform: translateY(1px);
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn--open {
+    background: var(--paper);
+    color: var(--blue);
+}
+
+.btn--open:hover {
+    background: var(--blue-tint);
+    border-color: var(--blue);
+}
+
+.btn--big {
+    min-height: 64px;
+    padding: 0 32px;
+    font-size: 20px;
+}
+
+.btn--big .icon {
+    width: 24px;
+    height: 24px;
+}
+
+.btn--stop {
+    background: var(--ink);
+    border-color: var(--ink);
+}
+
+.btn--stop:hover {
+    background: #000;
+    border-color: #000;
+}
+
+.btn--danger {
+    background: var(--danger);
+    border-color: var(--danger);
+}
+
+.btn--danger:hover {
+    background: #8f1d17;
+    border-color: #8f1d17;
+}
+
+.btn--bar {
+    margin-left: auto;
+    min-height: 40px;
+    padding: 0 18px;
+    background: var(--paper);
+    border-color: var(--paper);
+    color: var(--blue);
+    font-size: 16px;
+}
+
+.btn--bar:hover {
+    background: var(--blue-tint);
+    border-color: var(--blue-tint);
+}
+
+.btn--play {
+    min-width: 116px;
+}
+
+.btn__icon {
+    display: inline-flex;
+}
+
+.actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 12px;
+    margin-top: 48px;
+}
+
+.delete summary {
+    list-style: none;
+}
+
+.delete summary::-webkit-details-marker {
+    display: none;
+}
+
+.delete[open] summary {
+    background: var(--blue-tint);
+}
+
+.confirm {
+    margin-top: 12px;
+    max-width: 380px;
+    padding: 16px;
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+}
+
+.confirm p {
+    margin-bottom: 12px;
+}
+
+/* ---------------------------------------------------------------- status */
+
+.status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--ink);
+    font-size: 15px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.status .icon {
+    color: var(--blue);
+}
+
+.status[data-state="waiting"] .icon {
+    color: var(--soft);
+}
+
+.status[data-state="failed"] .icon {
+    color: var(--danger);
+}
+
+.status[data-state="working"] .icon,
+.steps [data-step-state="current"] .icon {
+    animation: working 1.2s steps(3, jump-none) infinite;
+}
+
+@keyframes working {
+    0% { opacity: 0.45; }
+    100% { opacity: 1; }
+}
+
+/* ---------------------------------------------------------------- processing and failed */
+
+.state__title {
+    font-size: 32px;
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -0.015em;
+    margin-bottom: 8px;
+}
+
+.steps {
+    margin-top: 28px;
+    max-width: 520px;
+    border-top: 2px solid var(--blue);
+}
+
+.steps li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 56px;
+    border-bottom: 1px solid var(--rule);
+    font-size: 18px;
+}
+
+.steps li .icon {
+    color: var(--blue);
+}
+
+.steps small {
+    margin-left: auto;
+    color: var(--soft);
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.steps [data-step-state="current"] {
+    font-weight: 800;
+}
+
+.steps [data-step-state="current"] small {
+    color: var(--ink);
+}
+
+.steps [data-step-state="upcoming"] {
+    color: var(--soft);
+}
+
+.steps [data-step-state="upcoming"] .icon {
+    color: var(--soft);
+}
+
+/* ---------------------------------------------------------------- Listen */
+
+.transport {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.transport__wave {
+    flex: 1;
+    min-width: 0;
+    height: 56px;
+    cursor: pointer;
+}
+
+.transport__time {
+    flex: none;
+    font-weight: 800;
+}
+
+/* ---------------------------------------------------------------- Transcript */
+
+.transcript {
+    max-width: 68ch;
+    font-size: 21px;
+    line-height: 2;
+}
+
+.transcript .w {
+    display: inline;
+    padding: 2px 1px;
+    margin: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    /* After the font shorthand, which would reset it: the mark fits the word, not the 2em line. */
+    line-height: 1.25;
+    text-align: left;
+    cursor: pointer;
+    border-radius: 3px;
+}
+
+.transcript .w:hover {
+    text-decoration: underline;
+    text-decoration-color: var(--blue);
+    text-decoration-thickness: 2px;
+}
+
+.transcript .w[data-current] {
+    background: var(--blue-tint);
+}
+
+.hl,
+.transcript .w[data-verdict="filler"] {
+    background: none;
+    color: var(--ink);
+    font-weight: 800;
+    padding: 2px 4px;
+    border-radius: 3px;
+}
+
+.hl[data-kind="sound"],
+.transcript .w[data-verdict="filler"][data-kind="sound"] {
+    background: var(--hl);
+}
+
+.hl[data-kind="phrase"],
+.transcript .w[data-verdict="filler"][data-kind="phrase"] {
+    padding-left: 1px;
+    padding-right: 1px;
+    text-decoration: underline;
+    text-decoration-color: var(--hl-edge);
+    text-decoration-thickness: 0.22em;
+    text-underline-offset: 0.18em;
+    text-decoration-skip-ink: none;
+}
+
+.transcript .w[data-verdict="filler"]:hover {
+    text-decoration: none;
+    outline: 2px solid var(--blue);
+    outline-offset: 1px;
+}
+
+/* The Filler being played. */
+.transcript .w[data-verdict="filler"][data-current] {
+    outline: 3px solid var(--blue);
+    outline-offset: 1px;
+}
+
+.transcript .w[data-verdict="not_filler"],
+.transcript .w[data-verdict="unjudged"],
+.key__off {
+    color: var(--soft);
+    text-decoration: underline dotted;
+    text-decoration-color: var(--soft);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 5px;
+}
+
+.key {
+    margin-top: 14px;
+    max-width: 68ch;
+    color: var(--soft);
+    font-size: 15px;
+    line-height: 1.8;
+}
+
+.key .hl {
+    padding: 1px 3px;
+}
+
+/* ---------------------------------------------------------------- lists */
+
+.fold summary {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    list-style: none;
+    cursor: pointer;
+}
+
+.fold summary::-webkit-details-marker {
+    display: none;
+}
+
+.fold summary::before {
+    content: "";
+    width: 9px;
+    height: 9px;
+    margin-left: 2px;
+    border-right: 2.5px solid currentColor;
+    border-bottom: 2.5px solid currentColor;
+    transform: rotate(-45deg);
+    transition: transform 160ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.fold[open] summary::before {
+    transform: rotate(45deg);
+}
+
+.fold summary:hover {
+    color: var(--blue-dark);
+}
+
+.fold__count {
+    margin-left: auto;
+    color: var(--soft);
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.rows {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.rows th {
+    padding: 8px 12px;
+    color: var(--soft);
+    font-size: 14px;
+    font-weight: 600;
+    text-align: left;
+    border-bottom: 1px solid var(--rule);
+}
+
+.rows td {
+    padding: 12px;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: baseline;
+}
+
+.rows th:first-child,
+.rows td:first-child {
+    padding-left: 0;
+    width: 72px;
+}
+
+.rows td:nth-child(2) {
+    width: 130px;
+    white-space: nowrap;
+}
+
+.rows tbody tr {
+    cursor: pointer;
+}
+
+.rows tbody tr:hover td {
+    background: var(--blue-tint);
+}
+
+.rows tbody tr[data-current] td {
+    background: var(--blue-tint);
+}
+
+.rows tbody tr[data-current] .timelink {
+    text-decoration-thickness: 3px;
+}
+
+.rows strong {
+    font-weight: 800;
+}
+
+.timelink {
+    color: var(--blue);
+    font-weight: 800;
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 4px;
+    cursor: pointer;
+}
+
+.timelink:hover {
+    color: var(--blue-dark);
+}
+
+.notes li {
+    display: grid;
+    grid-template-columns: 72px minmax(0, 1fr);
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--rule);
+}
+
+.notes .timelink {
+    justify-self: start;
+}
+
+.notes b {
+    display: block;
+    font-weight: 800;
+}
+
+.notes span span {
+    color: var(--soft);
+}
+
+/* ---------------------------------------------------------------- home */
+
+.lead {
+    font-size: 44px;
+    font-weight: 800;
+    line-height: 1.12;
+    letter-spacing: -0.025em;
+    text-wrap: balance;
+}
+
+.lead__sub {
+    margin-top: 16px;
+    max-width: 40ch;
+    color: var(--soft);
+    font-size: 20px;
+    line-height: 1.45;
+}
+
+.recorder__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px 24px;
+}
+
+.recorder__live {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 800;
+}
+
+.recorder__dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--danger);
+    animation: working 1s steps(2, jump-none) infinite alternate;
+}
+
+.clock {
+    margin-top: 28px;
+    max-width: 640px;
+}
+
+.clock__time {
+    font-size: 56px;
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+}
+
+.clock__meter {
+    position: relative;
+    height: 12px;
+    margin-top: 12px;
+    border-radius: 6px;
+    background: var(--blue-tint);
+    overflow: hidden;
+}
+
+/* The last 30 seconds of the five minutes. */
+.clock__warn {
+    position: absolute;
+    inset: 0 0 0 90%;
+    background: repeating-linear-gradient(-45deg, var(--blue) 0 2px, var(--blue-tint) 2px 6px);
+}
+
+.clock__fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    z-index: 1;
+    width: var(--done, 0%);
+    background: var(--blue);
+}
+
+.clock__scale {
+    position: relative;
+    height: 20px;
+    margin-top: 6px;
+    color: var(--soft);
+    font-size: 14px;
+}
+
+.clock__scale span {
+    position: absolute;
+    top: 0;
+}
+
+.clock__scale span:nth-child(2) {
+    left: 90%;
+    transform: translateX(-50%);
+}
+
+.clock__scale span:nth-child(3) {
+    right: 0;
+}
+
+.recorder__wavepanel {
+    margin-top: 24px;
+}
+
+.recorder__wave {
+    height: 80px;
+}
+
+.recorder__review > * + * {
+    margin-top: 24px;
+}
+
+.recorder__length {
+    font-weight: 600;
+}
+
+.recorder__length b {
+    margin-left: 4px;
+    font-size: 24px;
+    font-weight: 800;
+}
+
+.label {
+    display: block;
+    font-weight: 800;
+}
+
+.label__opt {
+    color: var(--soft);
+    font-weight: 400;
+}
+
+.field {
+    display: block;
+    width: 100%;
+    max-width: 480px;
+    min-height: 48px;
+    margin-top: 6px;
+    padding: 10px 14px;
+    border: 2px solid var(--rule);
+    border-radius: var(--radius);
+    background: var(--paper);
+    color: var(--ink);
+    font: inherit;
+}
+
+.field::placeholder {
+    color: #6b7280;
+}
+
+.field:hover {
+    border-color: #b3c2dd;
+}
+
+.field:focus {
+    border-color: var(--blue);
+    outline: none;
+}
+
+.list-band {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 0 var(--gutter) 72px;
+}
+
+.speeches a {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 200px 140px;
+    align-items: center;
+    gap: 24px;
+    padding: 14px 12px;
+    border-bottom: 1px solid var(--rule);
+    text-decoration: none;
+}
+
+.speeches a:hover {
+    background: var(--blue-tint);
+}
+
+.speeches__name {
+    display: block;
+    min-width: 0;
+}
+
+.speeches__title {
+    display: block;
+    overflow: hidden;
+    font-size: 20px;
+    font-weight: 800;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.speeches__date {
+    display: block;
+    color: var(--soft);
+    font-size: 15px;
+}
+
+.speeches__rate {
+    color: var(--soft);
+    font-size: 15px;
+    text-align: right;
+}
+
+.speeches__rate b {
+    margin-right: 4px;
+    color: var(--ink);
+    font-size: 24px;
+    font-weight: 800;
+}
+
+/* ---------------------------------------------------------------- narrow screens */
+
+@media (max-width: 1100px) {
+    :root {
+        --side: 400px;
+        --gap: 48px;
+        --gutter: 40px;
+    }
+
+    .summary {
+        font-size: 48px;
     }
 }
 
-/* Unlayered, like the tokens above, so it can override them. */
-@media (max-width: 1000px) {
+@media (max-width: 860px) {
     :root {
         --gutter: 20px;
     }
+
+    .bar {
+        gap: 20px;
+    }
+
+    .sheet {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 40px;
+        padding-top: 28px;
+    }
+
+    .lead {
+        font-size: 36px;
+    }
+
+    .speeches a {
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 4px 16px;
+    }
+
+    .speeches__rate {
+        grid-column: 1;
+        text-align: left;
+    }
+
+    .speeches .status {
+        grid-row: 1;
+        grid-column: 2;
+    }
 }
 
-/* The clock's eleven characters need 310px at 56px; only the narrowest phones get it smaller. */
-@media (max-width: 352px) {
-    .recorder__timer {
+@media (max-width: 560px) {
+    .bar {
+        gap: 16px;
+    }
+
+    .bar__mark {
+        font-size: 18px;
+    }
+
+    /* The wordmark already leads to the Speech list on home. */
+    .bar nav {
+        display: none;
+    }
+
+    .btn--bar {
+        padding: 0 14px;
+        font-size: 15px;
+    }
+
+    /* Play moves to the bar fixed at the bottom, so its heading has nothing left to head. */
+    section:has(> .transport) > .heading {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+    }
+
+    .summary {
+        font-size: 40px;
+    }
+
+    .facts {
+        font-size: 19px;
+    }
+
+    .lead {
+        font-size: 30px;
+    }
+
+    .clock__time {
         font-size: 44px;
-        line-height: 48px;
+    }
+
+    .transcript {
+        font-size: 19px;
+    }
+
+    .tallies li {
+        grid-template-columns: 104px minmax(0, 1fr) 36px;
+    }
+
+    .rows td:nth-child(2) {
+        width: auto;
+    }
+
+    .btn--big {
+        width: 100%;
+    }
+
+    /* The clock above already says 5:00; only the warning mark keeps its label. */
+    .clock__scale span:nth-child(3) {
+        display: none;
+    }
+
+    .speeches__title {
+        white-space: normal;
+    }
+
+    /* Play stays in reach while the Transcript scrolls. */
+    .transport {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 20;
+        gap: 12px;
+        padding: 10px var(--gutter);
+        background: var(--paper);
+        border-top: 2px solid var(--blue);
+    }
+
+    .sheet:has(.transport) {
+        padding-bottom: 120px;
+    }
+
+    .transport .btn--play {
+        min-width: 0;
+        padding: 0 16px;
+    }
+
+    .transport__time {
+        font-size: 15px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation: none !important;
+        transition: none !important;
     }
 }

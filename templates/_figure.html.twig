@@ -1,5 +1,0 @@
-{# A figure set in the cell-built face. Its "." and ":" are drawn as single square cells by CSS,
-   because the face's own punctuation reads as a plus sign; the characters stay in the text. #}
-{% macro figure(value) -%}
-    {{- value|e|replace({'.': '<span class="sep sep--dot"><span class="sr-only">.</span></span>', ':': '<span class="sep sep--colon"><span class="sr-only">:</span></span>'})|raw -}}
-{%- endmacro %}

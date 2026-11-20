@@ -2,23 +2,35 @@ import { Controller } from '@hotwired/stimulus';
 import WaveSurfer from 'wavesurfer.js';
 import RegionsPlugin from 'wavesurfer.js/dist/plugins/regions.esm.js';
 
-// A Filler's marker on the waveform: an ink stem with a small cell on top, filled the same way as
-// everywhere else (solid for a Filler Sound, a diagonal half for a Filler Phrase), so the kind
-// never depends on colour. WaveSurfer draws regions in a shadow root, hence the inline styles.
+// A Filler's marker on the waveform: an ink stem with a small highlighter tab on top, marked the
+// same way as the Transcript (solid for a Filler Sound, underlined for a Filler Phrase), so the
+// kind never depends on colour. WaveSurfer draws regions in a shadow root, hence the inline styles.
 const MARK_FILLS = {
-    sound: '#111',
-    phrase: 'linear-gradient(135deg, #111 50%, #fff 50%)',
+    sound: '#ffe066',
+    phrase: 'linear-gradient(#fff 50%, #ffe066 50%)',
 };
 
-function waveformMark(kind) {
+// Below this width (the phone Play bar) the tabs would run into each other, so a Filler is a
+// plain stem; its kind is still in the Transcript and the tallies. The same goes for a Filler
+// closer than one tab to the one before it.
+const COMPACT_WAVEFORM_PX = 240;
+const TAB_PX = 10;
+
+function waveformMark(kind, compact) {
     const stem = document.createElement('div');
-    stem.style.cssText = 'position:absolute;inset:0;border-left:2px solid #111;pointer-events:none';
-    const cell = document.createElement('div');
-    cell.style.cssText = `position:absolute;left:-2px;top:0;width:12px;height:12px;box-sizing:border-box;border:2px solid #111;background:${MARK_FILLS[kind] ?? MARK_FILLS.sound}`;
-    stem.append(cell);
+    stem.style.cssText = 'position:absolute;inset:0;border-left:2px solid #15181d;pointer-events:none';
+    if (compact) {
+        return stem;
+    }
+    const tab = document.createElement('div');
+    tab.style.cssText = `position:absolute;left:-2px;top:0;width:${TAB_PX}px;height:${TAB_PX}px;box-sizing:border-box;border:2px solid #15181d;border-radius:2px;background:${MARK_FILLS[kind] ?? MARK_FILLS.sound}`;
+    stem.append(tab);
 
     return stem;
 }
+
+const PLAY_ICON = '<svg class="icon" width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M6.5 4.5v11l9-5.5z" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>';
+const PAUSE_ICON = '<svg class="icon" width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M7 4.5v11M13 4.5v11" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>';
 
 // A Filler list row stays lit for this long after its Filler ends.
 const ROW_LINGER_SECONDS = 1;
@@ -28,9 +40,8 @@ const ROW_LINGER_SECONDS = 1;
 const LEAD_IN_SECONDS = 0.1;
 
 /*
- * The Report's player (SPEC §7): a seconds grid (one cell per second, Fillers filled in), a
- * waveform with one region per counted Filler, and seeking from the grid, the transcript, the
- * regions and the Filler list.
+ * The Report's player (SPEC §7): a waveform with one region per counted Filler, and seeking from
+ * the transcript, the regions and the Filler list.
  *
  * The <audio> element (data-report-player-target="audio") is the source of truth for playback:
  * the Recording is seekable (ticket 07) and served with HTTP Range. WaveSurfer only draws the
@@ -38,12 +49,11 @@ const LEAD_IN_SECONDS = 0.1;
  * (Safari has refused some of its own recordings), every seek and play still works.
  */
 export default class extends Controller {
-    static targets = ['audio', 'waveform', 'playButton', 'time', 'segment', 'waveformError', 'cell', 'row'];
+    static targets = ['audio', 'waveform', 'playButton', 'playIcon', 'playLabel', 'time', 'segment', 'waveformError', 'row'];
     static values = { fillers: Array };
 
     connect() {
         this.currentSegment = null;
-        this.currentSecond = -1;
         this.currentRow = null;
         this.segmentStarts = this.segmentTargets.map((segment) => parseFloat(segment.dataset.start));
 
@@ -51,14 +61,14 @@ export default class extends Controller {
         this.wavesurfer = WaveSurfer.create({
             container: this.waveformTarget,
             media: this.audioTarget,
-            height: 48,
-            waveColor: '#8c8c8c',
-            progressColor: '#111111',
-            cursorColor: '#e8401c',
+            height: 56,
+            waveColor: '#b8c6e0',
+            progressColor: '#1f4fa0',
+            cursorColor: '#15181d',
             cursorWidth: 2,
-            barWidth: 2,
+            barWidth: 3,
             barGap: 2,
-            barRadius: 0,
+            barRadius: 2,
             normalize: true,
             dragToSeek: true,
             plugins: [this.regions],
@@ -107,18 +117,6 @@ export default class extends Controller {
         }
     }
 
-    // The seconds grid: any cell seeks to its second; a Filler's cell seeks to the Filler itself.
-    seekCell(event) {
-        const cell = event.target.closest('[data-second]');
-        if (!cell) {
-            return;
-        }
-        const start = parseFloat(cell.dataset.start ?? cell.dataset.second);
-        if (!Number.isNaN(start)) {
-            this.playFrom(Math.max(0, start - LEAD_IN_SECONDS));
-        }
-    }
-
     playFrom(seconds) {
         this.audioTarget.currentTime = seconds;
         this.audioTarget.play().catch(() => {});
@@ -126,13 +124,22 @@ export default class extends Controller {
 
     addRegions() {
         this.regions.clearRegions();
+        const width = this.waveformTarget.clientWidth;
+        const compact = width < COMPACT_WAVEFORM_PX;
+        const pxPerSecond = width / (this.wavesurfer.getDuration() || 1);
+        let lastTabAt = -Infinity;
         this.fillersValue.forEach((filler) => {
+            const x = filler.start * pxPerSecond;
+            const crowded = x - lastTabAt < TAB_PX + 2;
+            if (!compact && !crowded) {
+                lastTabAt = x;
+            }
             this.regions.addRegion({
                 start: filler.start,
                 // Very short Fillers still get a region wide enough to see and click.
                 end: Math.max(filler.end, filler.start + 0.15),
                 color: 'transparent',
-                content: waveformMark(filler.kind),
+                content: waveformMark(filler.kind, compact || crowded),
                 drag: false,
                 resize: false,
             });
@@ -146,7 +153,8 @@ export default class extends Controller {
     }
 
     renderPlayButton(playing) {
-        this.playButtonTarget.textContent = playing ? 'Pause' : 'Play';
+        this.playLabelTarget.textContent = playing ? 'Pause' : 'Play';
+        this.playIconTarget.innerHTML = playing ? PAUSE_ICON : PLAY_ICON;
         this.playButtonTarget.setAttribute('aria-pressed', playing ? 'true' : 'false');
     }
 
@@ -154,24 +162,12 @@ export default class extends Controller {
         const current = this.audioTarget.currentTime || 0;
         const duration = Number.isFinite(this.audioTarget.duration) ? this.audioTarget.duration : 0;
         this.timeTarget.textContent = `${this.formatTime(current)} / ${this.formatTime(duration)}`;
-        this.highlightSegmentAt(current);
 
         const started = current > 0 || !this.audioTarget.paused;
-        this.highlightSecond(started ? Math.floor(current) : -1);
+        // Every seek starts LEAD_IN_SECONDS early, so look that far ahead: the word that was
+        // pressed lights at once instead of the word before it.
+        this.highlightSegmentAt(started ? current + LEAD_IN_SECONDS : -1);
         this.highlightRowAt(started ? current : -1);
-    }
-
-    // Rings the cell of the second being played and tints the ones already played.
-    highlightSecond(second) {
-        if (second === this.currentSecond) {
-            return;
-        }
-        this.currentSecond = second;
-        this.cellTargets.forEach((cell) => {
-            const cellSecond = parseInt(cell.dataset.second, 10);
-            cell.toggleAttribute('data-played', cellSecond < second);
-            cell.toggleAttribute('data-current', cellSecond === second);
-        });
     }
 
     // Lights the Filler list row of the Filler being played, and for a moment after it.
@@ -205,7 +201,7 @@ export default class extends Controller {
             }
         }
 
-        const segment = found >= 0 && (seconds > 0 || !this.audioTarget.paused) ? this.segmentTargets[found] : null;
+        const segment = found >= 0 ? this.segmentTargets[found] : null;
         if (segment === this.currentSegment) {
             return;
         }
