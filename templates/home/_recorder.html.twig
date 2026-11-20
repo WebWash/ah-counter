@@ -1,84 +1,99 @@
-{# The recorder (SPEC §7, ticket 07). Panels are switched by assets/controllers/recorder_controller.js. #}
-<section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8"
+{# The recorder (SPEC §7, ticket 07): the plane with the page heading and the clock, and the work
+   area with the panels. Panels are switched by assets/controllers/recorder_controller.js. #}
+{% import '_figure.html.twig' as figures %}
+<section class="top" id="recorder"
          aria-label="Recorder"
          data-controller="recorder"
          data-recorder-upload-url-value="{{ path('speech_upload') }}"
          data-recorder-csrf-token-value="{{ csrf_token(constant('App\\Controller\\SpeechController::UPLOAD_TOKEN_ID')) }}">
 
-    <div data-recorder-target="panel" data-panel="idle" class="flex flex-col items-center text-center">
-        <button type="button"
-                data-action="recorder#start"
-                class="group flex h-28 w-28 items-center justify-center rounded-full bg-rose-600 text-white shadow-lg shadow-rose-600/30 transition hover:bg-rose-700 focus:outline-none focus-visible:ring-4 focus-visible:ring-rose-300 active:scale-95">
-            <span class="sr-only">Record</span>
-            <svg class="h-10 w-10" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path d="M12 15a3.5 3.5 0 0 0 3.5-3.5v-6a3.5 3.5 0 1 0-7 0v6A3.5 3.5 0 0 0 12 15Z"/>
-                <path d="M18.5 11.5a.75.75 0 0 0-1.5 0 5 5 0 0 1-10 0 .75.75 0 0 0-1.5 0 6.5 6.5 0 0 0 5.75 6.46V20.5h-2.5a.75.75 0 0 0 0 1.5h6.5a.75.75 0 0 0 0-1.5h-2.5v-2.54a6.5 6.5 0 0 0 5.75-6.46Z"/>
-            </svg>
-        </button>
-        <p class="mt-4 text-base font-medium text-slate-900">Record</p>
-        <p class="mt-1 text-sm text-slate-500">Speak in English for 10 seconds to 5 minutes.</p>
-    </div>
+    <header class="plane">
+        <h1><span class="sr-only">Ah Counter: </span>Record a short English speech and see every "um", "uh" and "you know" you said.</h1>
+        <div class="plane__clock">
+            <p class="plane__label">Length</p>
+            <p class="recorder__timer" aria-live="off"><span data-recorder-target="timer">{{ figures.figure('0:00 / 5:00') }}</span></p>
+        </div>
+    </header>
 
-    <div data-recorder-target="panel" data-panel="recording review" hidden>
-        <div data-recorder-target="waveform" class="min-h-24 w-full overflow-hidden rounded-lg bg-slate-50"></div>
-    </div>
-
-    <div data-recorder-target="panel" data-panel="recording" hidden class="mt-6 flex flex-col items-center text-center">
-        <p class="flex items-center gap-2 font-mono text-2xl tabular-nums text-slate-900" aria-live="off">
-            <span class="h-3 w-3 animate-pulse rounded-full bg-rose-600" aria-hidden="true"></span>
-            <span data-recorder-target="timer">0:00 / 5:00</span>
-        </p>
-        <p data-recorder-target="warning" hidden role="status" class="mt-2 text-sm font-medium text-amber-700">
-            30 seconds left. Recording stops by itself at 5:00.
-        </p>
-        <button type="button"
-                data-action="recorder#stop"
-                class="mt-6 flex h-20 w-20 items-center justify-center rounded-full bg-slate-900 text-white shadow-lg transition hover:bg-slate-700 focus:outline-none focus-visible:ring-4 focus-visible:ring-slate-300 active:scale-95">
-            <span class="sr-only">Stop</span>
-            <span class="h-7 w-7 rounded-md bg-white" aria-hidden="true"></span>
-        </button>
-        <p class="mt-3 text-sm text-slate-500">Stop</p>
-    </div>
-
-    <div data-recorder-target="panel" data-panel="review" hidden class="mt-6">
-        <div class="flex items-center justify-between gap-4">
-            <button type="button"
-                    data-recorder-target="playButton"
-                    data-action="recorder#togglePlayback"
-                    aria-pressed="false"
-                    class="rounded-full border border-slate-300 px-5 py-2 text-sm font-medium text-slate-800 hover:bg-slate-50 focus:outline-none focus-visible:ring-4 focus-visible:ring-slate-200">Play</button>
-            <p class="text-sm text-slate-500">Length <span data-recorder-target="reviewDuration" class="font-mono tabular-nums text-slate-900">0:00</span></p>
+    <div class="work recorder">
+        <div data-recorder-target="panel" data-panel="idle" class="recorder__idle">
+            <button type="button" data-action="recorder#start" class="btn btn--big">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M12 15a3.5 3.5 0 0 0 3.5-3.5v-6a3.5 3.5 0 1 0-7 0v6A3.5 3.5 0 0 0 12 15Z"/>
+                    <path d="M18.5 11.5a.75.75 0 0 0-1.5 0 5 5 0 0 1-10 0 .75.75 0 0 0-1.5 0 6.5 6.5 0 0 0 5.75 6.46V20.5h-2.5a.75.75 0 0 0 0 1.5h6.5a.75.75 0 0 0 0-1.5h-2.5v-2.54a6.5 6.5 0 0 0 5.75-6.46Z"/>
+                </svg>
+                Record
+            </button>
+            <p class="hint">Speak in English for 10 seconds to 5 minutes.</p>
         </div>
 
-        <label for="speech-title" class="mt-6 block text-sm font-medium text-slate-700">Title <span class="font-normal text-slate-400">(optional)</span></label>
-        <input id="speech-title" type="text" maxlength="120" autocomplete="off"
-               data-recorder-target="title"
-               data-action="keydown.enter->recorder#analyse"
-               placeholder="e.g. Icebreaker, club meeting 17 Nov"
-               class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-200">
-
-        <div class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-            <button type="button"
-                    data-action="recorder#discard"
-                    class="rounded-lg px-5 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-100 focus:outline-none focus-visible:ring-4 focus-visible:ring-slate-200">Discard</button>
-            <button type="button"
-                    data-action="recorder#analyse"
-                    class="rounded-lg bg-rose-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-rose-700 focus:outline-none focus-visible:ring-4 focus-visible:ring-rose-300">Analyse</button>
+        <div data-recorder-target="panel" data-panel="recording" hidden>
+            <button type="button" data-action="recorder#stop" class="btn btn--big">
+                <span class="stop-mark" aria-hidden="true"></span>
+                Stop
+            </button>
+            <p data-recorder-target="warning" hidden role="status" class="notice">
+                30 seconds left. Recording stops by itself at 5:00.
+            </p>
         </div>
+
+        <div data-recorder-target="panel" data-panel="recording review" hidden class="recorder__wavepanel">
+            <div data-recorder-target="waveform" class="recorder__wave"></div>
+        </div>
+
+        {# Five minutes drawn as 300 cells; the controller fills one a second while recording. #}
+        <div data-recorder-target="panel" data-panel="idle recording" class="mt-6">
+            <p class="label">Five minutes, one cell a second</p>
+            <div class="seconds seconds--clock" data-cols="30" aria-hidden="true">
+                <div class="seconds__lines">
+                    {% for decade in 0..29 %}
+                        <div class="decade">
+                            <span class="seconds__t">{{ (decade * 10) // 60 }}:{{ '%02d'|format((decade * 10) % 60) }}</span>
+                            <span class="seconds__cells">
+                                {%- for i in 0..9 -%}
+                                    <span class="cell cell--still{{ decade >= 27 ? ' cell--last' }}" data-recorder-target="cell"></span>
+                                {%- endfor -%}
+                            </span>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div data-recorder-target="panel" data-panel="review" hidden class="recorder__review">
+            <div class="recorder__row">
+                <button type="button"
+                        data-recorder-target="playButton"
+                        data-action="recorder#togglePlayback"
+                        aria-pressed="false"
+                        class="btn btn--open">Play</button>
+                <p class="font-semibold">Length <span data-recorder-target="reviewDuration" class="text-2xl font-extrabold">0:00</span></p>
+            </div>
+
+            <div>
+                <label for="speech-title" class="label">Title <span class="font-normal text-(--soft)">(optional)</span></label>
+                <input id="speech-title" type="text" maxlength="120" autocomplete="off"
+                       data-recorder-target="title"
+                       data-action="keydown.enter->recorder#analyse"
+                       placeholder="e.g. Icebreaker, club meeting 17 Nov"
+                       class="field mt-1.5">
+            </div>
+
+            <div class="recorder__row recorder__row--end">
+                <button type="button" data-action="recorder#discard" class="btn btn--open">Discard</button>
+                <button type="button" data-action="recorder#analyse" class="btn">Analyse</button>
+            </div>
+        </div>
+
+        <div data-recorder-target="panel" data-panel="uploading" hidden role="status">
+            <p class="state-title">Uploading your Speech…</p>
+            <div class="ticker mt-6" aria-hidden="true"></div>
+        </div>
+
+        <p data-recorder-target="message" hidden role="alert" class="notice"></p>
+
+        <noscript>
+            <p class="notice">Recording needs JavaScript. Please enable it and reload the page.</p>
+        </noscript>
     </div>
-
-    <div data-recorder-target="panel" data-panel="uploading" hidden class="flex flex-col items-center py-8 text-center" role="status">
-        <svg class="h-10 w-10 animate-spin text-rose-600" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" class="opacity-20"/>
-            <path d="M22 12a10 10 0 0 0-10-10" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-        </svg>
-        <p class="mt-4 text-sm text-slate-600">Uploading your Speech…</p>
-    </div>
-
-    <p data-recorder-target="message" hidden role="alert"
-       class="mt-6 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-200"></p>
-
-    <noscript>
-        <p class="mt-6 text-sm text-slate-600">Recording needs JavaScript. Please enable it and reload the page.</p>
-    </noscript>
 </section>

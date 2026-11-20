@@ -1,9 +1,10 @@
-{% set badge_classes = {
-    pending: 'bg-slate-100 text-slate-700 ring-slate-200',
-    transcribing: 'bg-sky-50 text-sky-800 ring-sky-200',
-    analysing: 'bg-sky-50 text-sky-800 ring-sky-200',
-    coaching: 'bg-sky-50 text-sky-800 ring-sky-200',
-    done: 'bg-emerald-50 text-emerald-800 ring-emerald-200',
-    failed: 'bg-red-50 text-red-800 ring-red-200',
+{# Status is a cell fill plus its label, never colour alone: dashed, half, solid or crossed. #}
+{% set fills = {
+    pending: 'dashed',
+    transcribing: 'half',
+    analysing: 'half',
+    coaching: 'half',
+    done: 'solid',
+    failed: 'crossed',
 } %}
-<span data-speech-status class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset {{ badge_classes[status.value] }}">{{ status.label }}</span>
+<span data-speech-status class="status"><i class="c" data-fill="{{ fills[status.value] }}" aria-hidden="true"></i>{{ status.label }}</span>

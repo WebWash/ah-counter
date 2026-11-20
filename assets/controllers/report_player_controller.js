@@ -2,19 +2,35 @@ import { Controller } from '@hotwired/stimulus';
 import WaveSurfer from 'wavesurfer.js';
 import RegionsPlugin from 'wavesurfer.js/dist/plugins/regions.esm.js';
 
-// Region colours by kind: Filler Sounds rose, Filler Phrases amber (matches the transcript).
-const REGION_COLORS = {
-    sound: 'rgba(225, 29, 72, 0.28)',
-    phrase: 'rgba(217, 119, 6, 0.28)',
+// A Filler's marker on the waveform: an ink stem with a small cell on top, filled the same way as
+// everywhere else (solid for a Filler Sound, a diagonal half for a Filler Phrase), so the kind
+// never depends on colour. WaveSurfer draws regions in a shadow root, hence the inline styles.
+const MARK_FILLS = {
+    sound: '#111',
+    phrase: 'linear-gradient(135deg, #111 50%, #fff 50%)',
 };
+
+function waveformMark(kind) {
+    const stem = document.createElement('div');
+    stem.style.cssText = 'position:absolute;inset:0;border-left:2px solid #111;pointer-events:none';
+    const cell = document.createElement('div');
+    cell.style.cssText = `position:absolute;left:-2px;top:0;width:12px;height:12px;box-sizing:border-box;border:2px solid #111;background:${MARK_FILLS[kind] ?? MARK_FILLS.sound}`;
+    stem.append(cell);
+
+    return stem;
+}
+
+// A Filler list row stays lit for this long after its Filler ends.
+const ROW_LINGER_SECONDS = 1;
 
 // Start playback a moment before a Filler so its onset isn't clipped. Kept well inside the
 // ticket's "within about 0.3 s" so browser seek error has room too.
 const LEAD_IN_SECONDS = 0.1;
 
 /*
- * The Report's player (SPEC §7): a waveform with one region per counted Filler, and seeking from
- * the transcript, the regions and the Filler list.
+ * The Report's player (SPEC §7): a seconds grid (one cell per second, Fillers filled in), a
+ * waveform with one region per counted Filler, and seeking from the grid, the transcript, the
+ * regions and the Filler list.
  *
  * The <audio> element (data-report-player-target="audio") is the source of truth for playback:
  * the Recording is seekable (ticket 07) and served with HTTP Range. WaveSurfer only draws the
@@ -22,24 +38,27 @@ const LEAD_IN_SECONDS = 0.1;
  * (Safari has refused some of its own recordings), every seek and play still works.
  */
 export default class extends Controller {
-    static targets = ['audio', 'waveform', 'playButton', 'time', 'segment', 'waveformError'];
+    static targets = ['audio', 'waveform', 'playButton', 'time', 'segment', 'waveformError', 'cell', 'row'];
     static values = { fillers: Array };
 
     connect() {
         this.currentSegment = null;
+        this.currentSecond = -1;
+        this.currentRow = null;
         this.segmentStarts = this.segmentTargets.map((segment) => parseFloat(segment.dataset.start));
 
         this.regions = RegionsPlugin.create();
         this.wavesurfer = WaveSurfer.create({
             container: this.waveformTarget,
             media: this.audioTarget,
-            height: 96,
-            waveColor: '#94a3b8',
-            progressColor: '#475569',
-            cursorColor: '#0f172a',
+            height: 48,
+            waveColor: '#8c8c8c',
+            progressColor: '#111111',
+            cursorColor: '#e8401c',
+            cursorWidth: 2,
             barWidth: 2,
-            barGap: 1,
-            barRadius: 2,
+            barGap: 2,
+            barRadius: 0,
             normalize: true,
             dragToSeek: true,
             plugins: [this.regions],
@@ -88,6 +107,18 @@ export default class extends Controller {
         }
     }
 
+    // The seconds grid: any cell seeks to its second; a Filler's cell seeks to the Filler itself.
+    seekCell(event) {
+        const cell = event.target.closest('[data-second]');
+        if (!cell) {
+            return;
+        }
+        const start = parseFloat(cell.dataset.start ?? cell.dataset.second);
+        if (!Number.isNaN(start)) {
+            this.playFrom(Math.max(0, start - LEAD_IN_SECONDS));
+        }
+    }
+
     playFrom(seconds) {
         this.audioTarget.currentTime = seconds;
         this.audioTarget.play().catch(() => {});
@@ -100,7 +131,8 @@ export default class extends Controller {
                 start: filler.start,
                 // Very short Fillers still get a region wide enough to see and click.
                 end: Math.max(filler.end, filler.start + 0.15),
-                color: REGION_COLORS[filler.kind] ?? REGION_COLORS.sound,
+                color: 'transparent',
+                content: waveformMark(filler.kind),
                 drag: false,
                 resize: false,
             });
@@ -123,6 +155,39 @@ export default class extends Controller {
         const duration = Number.isFinite(this.audioTarget.duration) ? this.audioTarget.duration : 0;
         this.timeTarget.textContent = `${this.formatTime(current)} / ${this.formatTime(duration)}`;
         this.highlightSegmentAt(current);
+
+        const started = current > 0 || !this.audioTarget.paused;
+        this.highlightSecond(started ? Math.floor(current) : -1);
+        this.highlightRowAt(started ? current : -1);
+    }
+
+    // Rings the cell of the second being played and tints the ones already played.
+    highlightSecond(second) {
+        if (second === this.currentSecond) {
+            return;
+        }
+        this.currentSecond = second;
+        this.cellTargets.forEach((cell) => {
+            const cellSecond = parseInt(cell.dataset.second, 10);
+            cell.toggleAttribute('data-played', cellSecond < second);
+            cell.toggleAttribute('data-current', cellSecond === second);
+        });
+    }
+
+    // Lights the Filler list row of the Filler being played, and for a moment after it.
+    highlightRowAt(seconds) {
+        const row = seconds < 0 ? null : this.rowTargets.findLast((candidate) => {
+            const start = parseFloat(candidate.dataset.start) - LEAD_IN_SECONDS;
+            const end = parseFloat(candidate.dataset.end) + ROW_LINGER_SECONDS;
+
+            return start <= seconds && seconds < end;
+        }) ?? null;
+        if (row === this.currentRow) {
+            return;
+        }
+        this.currentRow?.removeAttribute('data-current');
+        row?.setAttribute('data-current', '');
+        this.currentRow = row;
     }
 
     // Highlights the transcript segment being spoken (the last one starting at or before now).

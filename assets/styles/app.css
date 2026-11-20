@@ -1,1 +1,1211 @@
 @import "tailwindcss";
+
+/*
+ * Seconds Grid: the visual system for Ah Counter (see DESIGN.md).
+ * White paper under a faint blue construction grid, one orange-red plane, ink rules, square
+ * corners. State is a cell fill, never colour alone: solid, diagonal half, or dashed.
+ */
+
+@font-face {
+    font-family: "Hanken Grotesk";
+    src: url("../fonts/hanken-grotesk-latin-wght.woff2") format("woff2");
+    font-weight: 100 900;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Doto";
+    src: url("../fonts/doto-latin-wght.woff2") format("woff2");
+    font-weight: 100 900;
+    font-display: swap;
+}
+
+:root {
+    --paper: #fff;
+    --ink: #111;
+    --soft: #4d4d4d;
+    --grid: #c9d8f2;
+    --played: #dfe8f8;
+    --plane: #e8401c;
+    --plane-tint: #ffe1d6;
+    --off: #8c8c8c;
+    --u: 24px;
+    --gutter: 48px;
+    --font-text: "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;
+    --font-figure: "Doto", ui-monospace, monospace;
+}
+
+@layer base {
+    html {
+        background: var(--paper);
+        color: var(--ink);
+        font-family: var(--font-text);
+        font-size: 16px;
+        line-height: 24px;
+        font-variant-numeric: tabular-nums;
+        caret-color: var(--plane);
+        scrollbar-color: var(--ink) var(--paper);
+    }
+
+    ::selection {
+        background: var(--ink);
+        color: var(--paper);
+    }
+
+    :focus-visible {
+        outline: 3px solid var(--ink);
+        outline-offset: 3px;
+    }
+
+    a {
+        text-underline-offset: 3px;
+    }
+}
+
+@layer components {
+    /* --- Shell --------------------------------------------------------------------------- */
+
+    .frame {
+        max-width: 1440px;
+        min-height: 100vh;
+        margin-inline: auto;
+        display: flex;
+        flex-direction: column;
+        /* The construction grid starts at the frame's corner, so modules can sit on its lines. */
+        background:
+            linear-gradient(var(--grid) 1px, transparent 1px) 0 0 / var(--u) var(--u),
+            linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0 / var(--u) var(--u),
+            var(--paper);
+    }
+
+    @media (min-width: 1442px) {
+        .frame {
+            border-inline: 2px solid var(--ink);
+        }
+    }
+
+    .bar {
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+        gap: 36px;
+        padding-inline: var(--gutter);
+        background: var(--paper);
+        border-bottom: 2px solid var(--ink);
+    }
+
+    .bar__mark {
+        font-weight: 800;
+        font-size: 20px;
+        letter-spacing: -0.02em;
+        text-decoration: none;
+        white-space: nowrap;
+    }
+
+    .bar .btn {
+        white-space: nowrap;
+    }
+
+    .bar__link {
+        font-weight: 600;
+        color: var(--soft);
+        text-decoration: none;
+        padding-block: 12px;
+    }
+
+    .bar__link:hover,
+    .bar__link[aria-current="page"] {
+        color: var(--ink);
+        box-shadow: inset 0 -3px 0 var(--ink);
+    }
+
+    .bar__action {
+        margin-left: auto;
+    }
+
+    .top {
+        display: grid;
+        grid-template-columns: minmax(0, 600px) minmax(0, 1fr);
+        border-bottom: 2px solid var(--ink);
+    }
+
+    /* A Speech page with no Report yet: the plane and the work area fill the screen. */
+    .top--fill {
+        flex: 1;
+        border-bottom: 0;
+    }
+
+    .plane {
+        background: var(--plane);
+        padding: 48px var(--gutter);
+    }
+
+    .plane h1 {
+        font-weight: 800;
+        font-size: 44px;
+        line-height: 48px;
+        letter-spacing: -0.03em;
+        text-wrap: balance;
+        overflow-wrap: anywhere;
+    }
+
+    .plane__meta {
+        margin-top: 12px;
+        font-weight: 600;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px 16px;
+    }
+
+    .plane__back {
+        display: inline-block;
+        margin-bottom: 24px;
+        font-weight: 600;
+    }
+
+    .work {
+        padding: 24px 24px 48px 72px;
+        min-width: 0;
+    }
+
+    .work > * {
+        max-width: 720px;
+    }
+
+    .plane__clock {
+        margin-top: 48px;
+    }
+
+    .plane__label {
+        font-weight: 600;
+        font-size: 14px;
+    }
+
+    .sheet {
+        flex: 1;
+        background: var(--paper);
+        padding: 24px var(--gutter) 72px;
+    }
+
+    .label {
+        font-weight: 800;
+        font-size: 15px;
+        line-height: 24px;
+    }
+
+    .work__head {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 4px 24px;
+    }
+
+    .actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        gap: 12px 24px;
+        margin-top: 24px;
+    }
+
+    .label--ruled {
+        padding-bottom: 10px;
+        border-bottom: 2px solid var(--ink);
+    }
+
+    .hint {
+        color: var(--soft);
+        font-size: 15px;
+        max-width: 68ch;
+    }
+
+    /* --- Figures --------------------------------------------------------------------------- */
+
+    .figure {
+        font-family: var(--font-figure);
+        font-weight: 900;
+        letter-spacing: -0.04em;
+    }
+
+    .figs {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+        margin-top: 36px;
+    }
+
+    .figs dt {
+        font-weight: 600;
+        font-size: 14px;
+    }
+
+    .figs dd {
+        display: flex;
+        align-items: baseline;
+        font-family: var(--font-figure);
+        font-weight: 900;
+        font-size: 72px;
+        line-height: 72px;
+        letter-spacing: -0.04em;
+    }
+
+    /* The most frequent Filler Type is a word, not a figure, so it is set in the text face. */
+    .figs [data-stat="top-type"] dd {
+        display: block;
+        font-family: var(--font-text);
+        font-weight: 800;
+        font-size: 44px;
+        letter-spacing: -0.03em;
+        overflow-wrap: anywhere;
+        /* Seats the word on the same baseline as the figure beside it. */
+        translate: 0 11px;
+    }
+
+    /* "." and ":" inside a figure, drawn as square cells (see templates/_figure.html.twig). */
+    .sep {
+        position: relative;
+        display: inline-block;
+        flex: none;
+        width: 0.29em;
+        height: 0.5em;
+    }
+
+    .sep::before {
+        content: "";
+        position: absolute;
+        left: 50%;
+        bottom: 0;
+        width: 0.085em;
+        height: 0.085em;
+        translate: -50% 0;
+        background: currentColor;
+    }
+
+    .sep--colon::before {
+        bottom: 0.096em;
+        box-shadow: 0 -0.288em 0 currentColor;
+    }
+
+    /* --- Controls -------------------------------------------------------------------------- */
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        min-height: 48px;
+        padding: 10px 24px;
+        background: var(--ink);
+        color: var(--paper);
+        border: 2px solid var(--ink);
+        font-weight: 800;
+        text-decoration: none;
+        cursor: pointer;
+        transition: background-color 120ms steps(2), color 120ms steps(2);
+    }
+
+    .btn:hover {
+        background: var(--plane);
+        color: var(--ink);
+    }
+
+    .btn:active {
+        background: var(--paper);
+        color: var(--ink);
+    }
+
+    .btn--small {
+        min-height: 36px;
+        padding: 4px 18px;
+    }
+
+    .btn--open {
+        background: var(--paper);
+        color: var(--ink);
+    }
+
+    .btn--open:hover {
+        background: var(--ink);
+        color: var(--paper);
+    }
+
+    .btn--big {
+        min-height: 72px;
+        padding-inline: 36px;
+        font-size: 20px;
+        letter-spacing: -0.01em;
+    }
+
+    .btn--confirm {
+        background: var(--plane);
+        color: var(--ink);
+    }
+
+    .btn--confirm:hover {
+        background: var(--ink);
+        color: var(--paper);
+    }
+
+    .field {
+        display: block;
+        width: 100%;
+        min-height: 48px;
+        padding: 10px 14px;
+        background: var(--paper);
+        border: 2px solid var(--ink);
+        font-size: 16px;
+    }
+
+    .field::placeholder {
+        color: #666;
+    }
+
+    /* 48px tall for one line (and 24 more per extra line), so what follows stays on the grid. */
+    .notice {
+        margin-top: 24px;
+        padding: 10px 16px;
+        border: 2px solid var(--ink);
+        background: var(--plane-tint);
+        font-weight: 600;
+        max-width: 68ch;
+    }
+
+    .confirm {
+        margin-top: 12px;
+        padding: 16px;
+        border: 2px solid var(--ink);
+        background: var(--paper);
+        max-width: 26rem;
+    }
+
+    .confirm .btn {
+        margin-top: 12px;
+    }
+
+    details > summary {
+        list-style: none;
+    }
+
+    details > summary::-webkit-details-marker {
+        display: none;
+    }
+
+    /* --- Cells: the state vocabulary ------------------------------------------------------- */
+
+    .c {
+        display: inline-block;
+        flex: none;
+        width: 16px;
+        height: 16px;
+        border: 2px solid var(--ink);
+        background: var(--paper);
+        vertical-align: -2px;
+    }
+
+    .c[data-fill="solid"] {
+        background: var(--ink);
+    }
+
+    .c[data-fill="half"] {
+        background: linear-gradient(135deg, var(--ink) 50%, var(--paper) 50%);
+    }
+
+    .c[data-fill="dashed"] {
+        border-style: dashed;
+        border-color: var(--off);
+    }
+
+    .c[data-fill="crossed"] {
+        background:
+            linear-gradient(45deg, transparent 43%, var(--ink) 43% 57%, transparent 57%),
+            linear-gradient(-45deg, transparent 43%, var(--ink) 43% 57%, transparent 57%),
+            var(--plane);
+    }
+
+    .key {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px 20px;
+        font-weight: 600;
+        font-size: 14px;
+        color: var(--soft);
+    }
+
+    .key .c {
+        margin-right: 6px;
+    }
+
+    .status {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+        font-size: 14px;
+        white-space: nowrap;
+    }
+
+    /* --- The seconds grid ------------------------------------------------------------------ */
+
+    .seconds {
+        --cols: 10;
+        --cell: 48px;
+        --label: 0px;
+        --per-line: 1;
+        margin-top: 24px;
+        container-type: inline-size;
+    }
+
+    .seconds[data-cols="20"] {
+        --per-line: 2;
+    }
+
+    .seconds[data-cols="30"] {
+        --per-line: 3;
+    }
+
+    /* Cells are a whole number of pixels wide, at most --cell, so every grid line stays crisp;
+       at full width they are 24 or 48px and sit on the construction grid. */
+    .seconds__lines {
+        --size: round(down, min(var(--cell), (100cqi - var(--label)) / var(--cols)), 1px);
+        display: grid;
+        grid-template-columns: repeat(var(--per-line), max-content);
+    }
+
+    /* Ten seconds of cells. Its time label hangs in the work column's left margin. */
+    .decade {
+        position: relative;
+        display: flex;
+        align-items: center;
+        height: var(--size);
+    }
+
+    .seconds__t {
+        position: absolute;
+        right: 100%;
+        margin-right: 12px;
+        font-weight: 800;
+        line-height: 1;
+        white-space: nowrap;
+    }
+
+    /* Only the first ten seconds of each line carry a label. */
+    .seconds[data-cols="20"] .decade:nth-child(2n) .seconds__t,
+    .seconds[data-cols="30"] .decade:not(:nth-child(3n + 1)) .seconds__t {
+        display: none;
+    }
+
+    .seconds__cells {
+        display: grid;
+        grid-template-columns: repeat(10, var(--size));
+    }
+
+    .cell {
+        position: relative;
+        z-index: 1;
+        display: block;
+        height: calc(var(--size) + 1px);
+        margin: 0 -1px -1px 0;
+        padding: 0;
+        border: 1px solid var(--ink);
+        background: var(--paper);
+        cursor: pointer;
+    }
+
+    .cell:hover {
+        background: var(--plane-tint);
+    }
+
+    .cell[data-played] {
+        background: var(--played);
+    }
+
+    .cell[data-kind="sound"] {
+        background: var(--ink);
+    }
+
+    .cell[data-kind="phrase"] {
+        background: linear-gradient(135deg, var(--ink) 50%, var(--paper) 50%);
+    }
+
+    .cell[data-kind="mixed"] {
+        background: linear-gradient(135deg, var(--ink) 38%, var(--paper) 38% 62%, var(--ink) 62%);
+    }
+
+    /* A hairline of paper inside each Filler cell, so neighbouring Fillers stay separate cells. */
+    .cell[data-kind] {
+        box-shadow: inset 0 0 0 2px var(--paper);
+    }
+
+    .cell[data-kind]:hover,
+    .cell[data-current] {
+        z-index: 2;
+        box-shadow: inset 0 0 0 4px var(--plane);
+    }
+
+    .cell:focus-visible {
+        z-index: 3;
+    }
+
+    .cell--off {
+        z-index: 0;
+        border: 1px dashed var(--off);
+        background: none;
+        cursor: default;
+    }
+
+    .cell--off:hover {
+        background: none;
+    }
+
+    .cell[data-filled] {
+        background: var(--ink);
+        box-shadow: inset 0 0 0 2px var(--paper);
+    }
+
+    .cell--last[data-filled] {
+        background: var(--plane);
+    }
+
+    /* Cells that show time passing or waiting; they are not controls. */
+    .cell--still {
+        pointer-events: none;
+    }
+
+    /* While a Speech is processed, one lit cell steps across its grid. */
+    @media (prefers-reduced-motion: no-preference) {
+        .cell--sweep {
+            animation: sweep var(--sweep, 6s) steps(1) infinite;
+            animation-delay: calc(var(--i) * 0.1s);
+        }
+    }
+
+    @keyframes sweep {
+        0% { background: var(--ink); }
+        4% { background: var(--paper); }
+        100% { background: var(--paper); }
+    }
+
+    .transport {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        margin-top: 24px;
+    }
+
+    .transport__wave {
+        flex: 1;
+        min-width: 0;
+        min-height: 48px;
+        overflow: hidden;
+    }
+
+    .transport__time {
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    /* Ten cells that fill one a second while something is being worked on. */
+    .ticker {
+        position: relative;
+        width: min(100%, 480px);
+        aspect-ratio: 10;
+        border: 1px solid var(--ink);
+        background: var(--paper);
+        overflow: hidden;
+    }
+
+    .ticker::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: var(--ink);
+        transform-origin: left;
+        transform: scaleX(0.3);
+    }
+
+    .ticker::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: repeating-linear-gradient(90deg, transparent 0 calc(10% - 1px), #fff calc(10% - 1px) 10%);
+        mix-blend-mode: difference;
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+        .ticker::before {
+            animation: tick 10s steps(10, jump-start) infinite;
+        }
+    }
+
+    @keyframes tick {
+        from { transform: scaleX(0); }
+        to { transform: scaleX(1); }
+    }
+
+    /* --- Report body ----------------------------------------------------------------------- */
+
+    .report {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 432px);
+        grid-template-rows: auto 1fr;
+        gap: 48px;
+        align-items: start;
+    }
+
+    /* The side column runs beside both the Filler list and the Transcript. */
+    .report__side {
+        grid-column: 2;
+        grid-row: 1 / span 2;
+        display: grid;
+        gap: 36px;
+    }
+
+    .report__main {
+        grid-column: 1;
+    }
+
+    .report__wide {
+        grid-column: 1 / -1;
+    }
+
+    .rows {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+    }
+
+    .rows th {
+        padding: 8px 8px 7px;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--soft);
+        border-bottom: 1px solid var(--grid);
+    }
+
+    .rows td {
+        padding: 11px 8px 12px;
+        border-bottom: 1px solid var(--grid);
+        vertical-align: top;
+    }
+
+    .rows tbody tr {
+        cursor: pointer;
+    }
+
+    .rows tbody tr:hover td,
+    .rows tbody tr[data-current] td {
+        background: var(--plane-tint);
+    }
+
+    .rows td:first-child {
+        width: 72px;
+    }
+
+    .rows td:nth-child(2) {
+        width: 168px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .rows .c {
+        margin-right: 8px;
+    }
+
+    .rows td strong {
+        font-weight: 800;
+    }
+
+    .timelink {
+        font-weight: 800;
+        text-decoration: underline;
+        text-underline-offset: 3px;
+        cursor: pointer;
+    }
+
+    .timelink:hover {
+        background: var(--ink);
+        color: var(--paper);
+    }
+
+    .types {
+        margin-top: 12px;
+        display: grid;
+        gap: 6px;
+    }
+
+    .types li {
+        display: grid;
+        grid-template-columns: 7.5rem minmax(0, 1fr) 3rem;
+        align-items: start;
+        gap: 12px;
+        font-weight: 600;
+    }
+
+    /* One cell per Filler. */
+    .types__run {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        padding-block: 4px;
+    }
+
+    .types [data-count] {
+        font-weight: 800;
+        font-size: 20px;
+        text-align: right;
+    }
+
+
+    .coaching__summary {
+        margin-top: 12px;
+        font-size: 20px;
+        line-height: 28px;
+    }
+
+    .coaching h3 {
+        margin-top: 20px;
+        font-weight: 800;
+        font-size: 14px;
+    }
+
+    .coaching ul {
+        margin-top: 6px;
+        padding-left: 20px;
+        list-style: square;
+        display: grid;
+        gap: 6px;
+    }
+
+    .praise {
+        border: 2px solid var(--ink);
+        padding: 24px;
+    }
+
+    .praise h2 {
+        font-weight: 800;
+        font-size: 28px;
+        line-height: 36px;
+        letter-spacing: -0.02em;
+    }
+
+    .praise p {
+        margin-top: 6px;
+    }
+
+    .transcript {
+        margin-top: 12px;
+        font-size: 20px;
+        line-height: 40px;
+        max-width: 68ch;
+    }
+
+    .w {
+        padding: 2px 1px;
+        cursor: pointer;
+    }
+
+    .w:hover {
+        background: var(--plane-tint);
+    }
+
+    .w[data-current] {
+        background: var(--plane-tint);
+        box-shadow: 0 3px 0 var(--plane);
+    }
+
+    .w[data-verdict="filler"] {
+        font-weight: 700;
+        padding: 2px 7px;
+        margin-inline: 1px;
+        border: 2px solid var(--ink);
+    }
+
+    .w[data-verdict="filler"][data-kind="sound"] {
+        background: var(--ink);
+        color: var(--paper);
+    }
+
+    .w[data-verdict="filler"][data-kind="phrase"] {
+        background: var(--paper);
+    }
+
+    .w[data-verdict="filler"][data-kind="phrase"]::before {
+        content: "";
+        display: inline-block;
+        width: 0.7em;
+        height: 0.7em;
+        margin-right: 7px;
+        border: 2px solid var(--ink);
+        background: linear-gradient(135deg, var(--ink) 50%, var(--paper) 50%);
+    }
+
+    .w[data-verdict="filler"]:hover,
+    .w[data-verdict="filler"][data-current] {
+        box-shadow: 0 0 0 4px var(--plane);
+    }
+
+    .w[data-verdict="not_filler"],
+    .w[data-verdict="unjudged"] {
+        color: var(--soft);
+        text-decoration: underline dashed;
+        text-decoration-thickness: 2px;
+        text-underline-offset: 7px;
+    }
+
+    .notes {
+        margin-top: 4px;
+    }
+
+    .notes li {
+        display: grid;
+        grid-template-columns: 56px minmax(0, 1fr);
+        gap: 8px;
+        padding: 11px 0 12px;
+        border-bottom: 1px solid var(--grid);
+    }
+
+    .notes b {
+        font-weight: 800;
+    }
+
+    .notes span span {
+        display: block;
+        color: var(--soft);
+    }
+
+    /* --- Processing ------------------------------------------------------------------------ */
+
+    .steps {
+        margin-top: 48px;
+        display: grid;
+        gap: 24px;
+        max-width: 480px;
+    }
+
+    /* Each step is a 48px cell on the construction grid, with a 24px line between steps. */
+    .steps li {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        font-size: 20px;
+        font-weight: 600;
+        color: var(--soft);
+    }
+
+    .steps li[data-step-state="complete"],
+    .steps li[data-step-state="current"] {
+        color: var(--ink);
+    }
+
+    .steps li[data-step-state="current"] {
+        font-weight: 800;
+    }
+
+    .steps .c {
+        width: 48px;
+        height: 48px;
+        border-width: 1px;
+    }
+
+    .steps small {
+        margin-left: auto;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .state-title {
+        padding-bottom: 12px;
+        font-weight: 800;
+        font-size: 28px;
+        line-height: 36px;
+        letter-spacing: -0.02em;
+        text-wrap: balance;
+    }
+
+    /* --- Recorder -------------------------------------------------------------------------- */
+
+    .recorder__idle {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 12px 24px;
+    }
+
+    .recorder__timer {
+        font-family: var(--font-figure);
+        font-weight: 900;
+        font-size: 72px;
+        line-height: 72px;
+        letter-spacing: -0.04em;
+    }
+
+    .recorder__wavepanel {
+        margin-top: 24px;
+    }
+
+    .recorder__wave {
+        min-height: 72px;
+        margin-bottom: 24px;
+        border-block: 1px solid var(--ink);
+        overflow: hidden;
+        background: var(--paper);
+    }
+
+    .recorder__review {
+        display: grid;
+        gap: 24px;
+        max-width: 720px;
+    }
+
+    .recorder__row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 12px 24px;
+    }
+
+    .recorder__row--end {
+        justify-content: flex-end;
+    }
+
+    .seconds--clock {
+        --cols: 30;
+        --cell: 24px;
+    }
+
+    .seconds--clock .seconds__t {
+        font-size: 14px;
+        color: var(--soft);
+    }
+
+    .stop-mark {
+        width: 20px;
+        height: 20px;
+        background: currentColor;
+    }
+
+    /* --- Speech list ----------------------------------------------------------------------- */
+
+    .speeches {
+        margin-top: 0;
+    }
+
+    .speeches a {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 9rem 8rem;
+        align-items: center;
+        gap: 24px;
+        padding: 11px 8px 12px;
+        border-bottom: 1px solid var(--grid);
+        text-decoration: none;
+    }
+
+    .speeches a:hover {
+        background: var(--plane-tint);
+    }
+
+    .speeches__title {
+        font-weight: 800;
+        font-size: 20px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .speeches__date {
+        color: var(--soft);
+        font-size: 14px;
+    }
+
+    .speeches__rate {
+        text-align: right;
+        font-size: 14px;
+        color: var(--soft);
+        line-height: 18px;
+    }
+
+    /* The cell-built face is for headline figures; at list size the text face reads better. */
+    .speeches__rate span {
+        display: block;
+        font-weight: 800;
+        font-size: 28px;
+        line-height: 32px;
+        letter-spacing: -0.02em;
+        color: var(--ink);
+    }
+
+    .empty {
+        margin-top: 24px;
+        padding: 36px 24px;
+        border: 1px dashed var(--off);
+        color: var(--soft);
+        max-width: 68ch;
+    }
+
+    /* --- Narrow screens -------------------------------------------------------------------- */
+
+    @media (max-width: 1000px) {
+        .top,
+        .report {
+            grid-template-columns: minmax(0, 1fr);
+        }
+
+        .report__side {
+            grid-column: 1;
+            grid-row: auto;
+        }
+
+        .report {
+            gap: 36px;
+        }
+
+        .plane {
+            padding-block: 32px;
+        }
+
+        .plane h1 {
+            font-size: 28px;
+            line-height: 36px;
+        }
+
+        .work {
+            padding: 24px var(--gutter) 32px;
+        }
+
+        /* No margin to hang labels in: they sit in a column before the cells. */
+        .seconds {
+            --label: 52px;
+        }
+
+        .seconds__t {
+            position: static;
+            flex: none;
+            width: var(--label);
+            margin: 0;
+        }
+
+        .bar {
+            gap: 20px;
+        }
+    }
+
+    @media (max-width: 560px) {
+        .figs dd {
+            font-size: 56px;
+            line-height: 60px;
+        }
+
+        .recorder__timer {
+            font-size: 56px;
+            line-height: 60px;
+        }
+
+        .figs [data-stat="top-type"] dd {
+            font-size: 28px;
+            translate: 0 9px;
+        }
+
+        .transport {
+            flex-wrap: wrap;
+            gap: 12px 16px;
+        }
+
+        .transport__wave {
+            order: 3;
+            flex-basis: 100%;
+        }
+
+        .rows td:nth-child(2) {
+            width: auto;
+            white-space: normal;
+        }
+
+        .rows td:first-child {
+            width: 56px;
+        }
+
+        .speeches a {
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 4px 16px;
+        }
+
+        .speeches .status {
+            grid-column: 1 / -1;
+        }
+
+        /* A Report's grid drops to ten cells a line on a phone, so a Filler's fill stays
+           readable; the grid grows taller instead. */
+        .seconds:not(.seconds--clock) {
+            --cols: 10 !important;
+            --cell: 48px !important;
+            --per-line: 1;
+        }
+
+        .seconds:not(.seconds--clock)[data-cols] .decade .seconds__t {
+            display: block;
+        }
+
+        /* The recorder's clock keeps thirty small cells a line; label every other line. */
+        .seconds--clock {
+            --label: 40px;
+        }
+
+        .seconds--clock .seconds__t {
+            font-size: 14px;
+        }
+
+        .seconds--clock .decade:nth-child(6n + 4) .seconds__t {
+            visibility: hidden;
+            display: block;
+        }
+
+        /* Play stays in reach while a tall grid scrolls past. */
+        .transport {
+            position: sticky;
+            bottom: 0;
+            z-index: 5;
+            margin-inline: calc(var(--gutter) * -1);
+            padding: 12px var(--gutter);
+            background: var(--paper);
+            border-top: 2px solid var(--ink);
+        }
+
+        .bar {
+            gap: 14px;
+        }
+
+        .bar__mark {
+            font-size: 16px;
+        }
+
+        .bar .btn--small {
+            padding-inline: 12px;
+        }
+
+        .btn--big {
+            width: 100%;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .btn {
+            transition: none;
+        }
+    }
+}
+
+/* Unlayered, like the tokens above, so it can override them. */
+@media (max-width: 1000px) {
+    :root {
+        --gutter: 20px;
+    }
+}
+
+/* The clock's eleven characters need 310px at 56px; only the narrowest phones get it smaller. */
+@media (max-width: 352px) {
+    .recorder__timer {
+        font-size: 44px;
+        line-height: 48px;
+    }
+}

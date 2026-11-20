@@ -3,18 +3,11 @@
 {% block title %}Ah Counter{% endblock %}
 
 {% block body %}
-    <main class="mx-auto max-w-2xl px-4 py-10 sm:py-16">
-        <header>
-            <h1 class="text-4xl font-bold tracking-tight text-slate-900">Ah Counter</h1>
-            <p class="mt-3 text-lg text-slate-600">
-                Record a short English speech and see every "um", "uh" and "you know" you said.
-            </p>
-        </header>
+    <main id="main" class="flex flex-1 flex-col">
+        {{ include('home/_recorder.html.twig') }}
 
-        <div class="mt-8">
-            {{ include('home/_recorder.html.twig') }}
+        <div class="sheet" id="speeches">
+            {{ include('home/_recent_speeches.html.twig') }}
         </div>
-
-        {{ include('home/_recent_speeches.html.twig') }}
     </main>
 {% endblock %}

@@ -1,13 +1,11 @@
 {# Delete with an inline "Are you sure?" step instead of a browser dialog (SPEC §7). #}
-<details class="group">
-    <summary class="cursor-pointer list-none rounded-lg px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50 focus:outline-none focus-visible:ring-4 focus-visible:ring-red-200 [&::-webkit-details-marker]:hidden">
-        Delete
-    </summary>
-    <div class="mt-3 rounded-lg bg-red-50 p-4 text-sm text-red-900 ring-1 ring-red-200">
+<details>
+    <summary class="btn btn--open">Delete</summary>
+    <div class="confirm">
         <p>Delete this Speech and its Recording? This can't be undone.</p>
-        <form method="post" action="{{ path('speech_delete', {id: speech.id}) }}" class="mt-3">
+        <form method="post" action="{{ path('speech_delete', {id: speech.id}) }}">
             <input type="hidden" name="_token" value="{{ csrf_token(constant('App\\Controller\\SpeechController::DELETE_TOKEN_ID')) }}">
-            <button type="submit" class="rounded-lg bg-red-600 px-4 py-2 font-semibold text-white hover:bg-red-700 focus:outline-none focus-visible:ring-4 focus-visible:ring-red-300">Yes, delete it</button>
+            <button type="submit" class="btn btn--confirm">Yes, delete it</button>
         </form>
     </div>
 </details>

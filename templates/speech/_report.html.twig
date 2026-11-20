@@ -4,161 +4,220 @@
 
 {% set report = page.report %}
 {% set markers = page.countedFillers|map(c => {start: c.filler.start, end: c.filler.end, kind: c.filler.kind.value, type: c.filler.type}) %}
-{# One colour per kind, shared by the waveform legend, bars, transcript and Filler list. #}
-{% set chip_classes = {sound: 'bg-rose-100 text-rose-800', phrase: 'bg-amber-100 text-amber-900'} %}
-{% set bar_classes = {sound: 'bg-rose-500', phrase: 'bg-amber-500'} %}
+{# One fill per kind, shared by the seconds grid, bars, Transcript and Filler list: solid for a
+   Filler Sound, a diagonal half for a Filler Phrase. #}
+{% set fills = {sound: 'solid', phrase: 'half'} %}
 
-<div class="mt-8 space-y-6"
+{# The seconds grid: one cell per second of the Recording, more cells per row for longer Speeches. #}
+{% set total = max(1, report.durationSeconds|round(0, 'ceil')) %}
+{% set cols = total <= 60 ? 10 : (total <= 150 ? 20 : 30) %}
+{% set by_second = {} %}
+{% for item in page.countedFillers %}
+    {% set key = 's' ~ min(total - 1, item.filler.start|round(0, 'floor')) %}
+    {% set by_second = by_second|merge({(key): (by_second[key] ?? [])|merge([item.filler])}) %}
+{% endfor %}
+
+<div class="flex flex-1 flex-col"
      data-controller="report-player"
      data-report-player-fillers-value="{{ markers|json_encode }}">
 
-    {# 2. Stat cards #}
-    <dl class="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        {% for stat in [
-            {name: 'duration', label: 'Length', value: report_helpers.clock(report.durationSeconds)},
-            {name: 'total', label: 'Fillers', value: report.totalFillers},
-            {name: 'per-minute', label: 'Fillers per minute', value: report.fillersPerMinuteRounded|number_format(1)},
-            {name: 'top-type', label: 'Most frequent', value: report.topType ?? '—'},
-        ] %}
-            <div data-stat="{{ stat.name }}" class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-                <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">{{ stat.label }}</dt>
-                <dd data-value class="mt-1 truncate text-2xl font-bold tabular-nums text-slate-900">{{ stat.value }}</dd>
+    <div class="top">
+        {# 1 and 2. Title, date and the four figures #}
+        {{ include('speech/_plane.html.twig', {report: report}) }}
+
+        {# 3. The Recording: seconds grid, Play and the waveform #}
+        <section aria-label="Recording" class="work">
+            <audio data-report-player-target="audio" src="{{ path('speech_recording', {id: speech.id}) }}" preload="auto"></audio>
+
+            <div class="work__head">
+                <h2 class="label">One cell is one second</h2>
+                <p class="key">
+                    <span><i class="c" data-fill="solid" aria-hidden="true"></i>Filler Sound</span>
+                    <span><i class="c" data-fill="half" aria-hidden="true"></i>Filler Phrase</span>
+                </p>
             </div>
-        {% endfor %}
-    </dl>
 
-    {# 3. Waveform player with Filler markers #}
-    <section aria-label="Recording" class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
-        <audio data-report-player-target="audio" src="{{ path('speech_recording', {id: speech.id}) }}" preload="auto"></audio>
-        <div data-report-player-target="waveform" class="min-h-24 w-full overflow-hidden rounded-lg bg-slate-50"></div>
-        <p data-report-player-target="waveformError" hidden class="mt-2 text-sm text-slate-500">
-            This browser couldn't draw the waveform, but Play and every link below still work.
-        </p>
-        <div class="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
-            <button type="button"
-                    data-report-player-target="playButton"
-                    data-action="report-player#toggle"
-                    aria-pressed="false"
-                    class="rounded-full bg-slate-900 px-5 py-2 text-sm font-semibold text-white hover:bg-slate-700 focus:outline-none focus-visible:ring-4 focus-visible:ring-slate-300">Play</button>
-            <span data-report-player-target="time" class="font-mono text-sm tabular-nums text-slate-600">0:00 / {{ report_helpers.clock(report.durationSeconds) }}</span>
-            <span class="ml-auto flex items-center gap-4 text-xs text-slate-500">
-                <span class="flex items-center gap-1.5"><span class="h-3 w-3 rounded-sm bg-rose-200 ring-1 ring-rose-400" aria-hidden="true"></span>Filler Sound</span>
-                <span class="flex items-center gap-1.5"><span class="h-3 w-3 rounded-sm bg-amber-200 ring-1 ring-amber-400" aria-hidden="true"></span>Filler Phrase</span>
-            </span>
-        </div>
-    </section>
-
-    {# 4. Breakdown by Filler Type #}
-    {% if report.totalFillers > 0 %}
-        {% set most = report.byType|first %}
-        <section data-breakdown aria-labelledby="breakdown-heading" class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
-            <h2 id="breakdown-heading" class="text-lg font-semibold text-slate-900">Fillers by type</h2>
-            <p class="mt-1 text-sm text-slate-500">{{ report.soundCount }} Filler Sound{{ report.soundCount == 1 ? '' : 's' }} · {{ report.phraseCount }} Filler Phrase{{ report.phraseCount == 1 ? '' : 's' }}</p>
-            <ul class="mt-4 space-y-2">
-                {% for type, count in report.byType %}
-                    {% set kind = page.kindOf(type).value %}
-                    <li data-filler-type="{{ type }}" data-kind="{{ kind }}" class="grid grid-cols-[5.5rem_1fr_2rem] items-center gap-3 text-sm">
-                        <span class="truncate font-medium text-slate-700">{{ type }}</span>
-                        <span class="h-3 overflow-hidden rounded-full bg-slate-100" aria-hidden="true">
-                            <span class="block h-full rounded-full {{ bar_classes[kind] }}" style="width: {{ (count / most * 100)|round(1) }}%"></span>
-                        </span>
-                        <span data-count class="text-right font-mono tabular-nums text-slate-900">{{ count }}</span>
-                    </li>
-                {% endfor %}
-            </ul>
-        </section>
-    {% else %}
-        <section data-no-fillers class="rounded-2xl border border-emerald-200 bg-emerald-50 p-6 text-center">
-            <h2 class="text-lg font-semibold text-emerald-900">No Fillers counted</h2>
-            <p class="mt-1 text-sm text-emerald-800">Nothing in this Speech counted as a Filler. Well done: keep using pauses instead.</p>
-        </section>
-    {% endif %}
-
-    {# 5. Coaching #}
-    {% set coaching = report.coaching %}
-    {% if coaching is not null %}
-        <section data-coaching aria-labelledby="coaching-heading" class="rounded-2xl border border-sky-200 bg-sky-50 p-4 shadow-sm sm:p-6">
-            <h2 id="coaching-heading" class="text-lg font-semibold text-slate-900">Coaching</h2>
-            <p data-coaching-summary class="mt-2 text-base leading-7 text-slate-800">{{ coaching.summary }}</p>
-            <div class="mt-4 grid gap-4 sm:grid-cols-2">
-                {% if coaching.patterns is not empty %}
-                    <div>
-                        <h3 class="text-xs font-semibold uppercase tracking-wide text-sky-800">What we noticed</h3>
-                        <ul data-coaching-patterns class="mt-2 list-disc space-y-1 pl-5 text-sm leading-6 text-slate-700">
-                            {% for pattern in coaching.patterns %}<li>{{ pattern }}</li>{% endfor %}
-                        </ul>
-                    </div>
-                {% endif %}
-                {% if coaching.tips is not empty %}
-                    <div>
-                        <h3 class="text-xs font-semibold uppercase tracking-wide text-sky-800">Try next time</h3>
-                        <ul data-coaching-tips class="mt-2 list-disc space-y-1 pl-5 text-sm leading-6 text-slate-700">
-                            {% for tip in coaching.tips %}<li>{{ tip }}</li>{% endfor %}
-                        </ul>
-                    </div>
-                {% endif %}
-            </div>
-        </section>
-    {% endif %}
-
-    {# 6. Interactive transcript #}
-    <section aria-labelledby="transcript-heading" class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
-        <h2 id="transcript-heading" class="text-lg font-semibold text-slate-900">Transcript</h2>
-        <p class="mt-1 text-sm text-slate-500">Click any word to hear it. Faded words were checked and not counted; hover them to see why.</p>
-        <div data-transcript class="mt-4 text-base leading-8 text-slate-800">
-            {%- for segment in page.segments %}
-                {% set occurrence = segment.occurrence %}
-                {% set text = segment.words|map(word => word.punctuated)|join(' ') %}
-                {% if occurrence is null %}
-                    <button type="button" tabindex="-1" data-report-player-target="segment" data-action="report-player#seek" data-start="{{ segment.start }}"
-                            class="rounded px-0.5 hover:bg-slate-100 data-current:bg-sky-100">{{ text }}</button>
-                {% elseif occurrence.isFiller %}
-                    <button type="button" data-report-player-target="segment" data-action="report-player#seek" data-start="{{ segment.start }}"
-                            data-verdict="filler" data-kind="{{ occurrence.kind.value }}"
-                            title="{{ occurrence.kind.label }}: {{ occurrence.type }}{{ occurrence.reason ? ' (' ~ occurrence.reason ~ ')' }}"
-                            class="rounded px-1 font-semibold focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 data-current:ring-2 data-current:ring-sky-400 {{ chip_classes[occurrence.kind.value] }}">{{ text }}</button>
-                {% else %}
-                    <button type="button" tabindex="-1" data-report-player-target="segment" data-action="report-player#seek" data-start="{{ segment.start }}"
-                            data-verdict="{{ occurrence.verdict.value }}" data-kind="{{ occurrence.kind.value }}"
-                            title="Not counted: {{ occurrence.verdict.value == 'not_filler' ? (occurrence.reason ?? 'a genuine use of the word') : 'this Candidate has not been judged' }}"
-                            class="rounded px-0.5 text-slate-400 underline decoration-dotted underline-offset-4 hover:bg-slate-100 data-current:bg-sky-100">{{ text }}</button>
-                {% endif %}
-            {%- endfor %}
-        </div>
-    </section>
-
-    {# 7. Filler list #}
-    {% if page.countedFillers is not empty %}
-        <section data-filler-list aria-labelledby="filler-list-heading" class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-            <h2 id="filler-list-heading" class="px-4 pt-4 text-lg font-semibold text-slate-900 sm:px-6 sm:pt-6">Every Filler</h2>
-            <table class="mt-3 w-full text-left text-sm">
-                <thead class="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500">
-                    <tr>
-                        <th scope="col" class="w-16 px-4 py-2 font-medium sm:pl-6">Time</th>
-                        <th scope="col" class="w-24 px-2 py-2 font-medium">Type</th>
-                        <th scope="col" class="px-4 py-2 font-medium sm:pr-6">Context</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100">
-                    {% for item in page.countedFillers %}
-                        {% set filler = item.filler %}
-                        <tr data-start="{{ filler.start }}" data-action="click->report-player#seek" class="cursor-pointer hover:bg-slate-50">
-                            <td class="px-4 py-2 align-top font-mono tabular-nums sm:pl-6">
-                                <button type="button" class="rounded text-sky-700 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
-                                        aria-label="Play from {{ report_helpers.clock(filler.start) }}">{{ report_helpers.clock(filler.start) }}</button>
-                            </td>
-                            <td class="px-2 py-2 align-top">
-                                <span class="rounded px-1.5 py-0.5 font-medium {{ chip_classes[filler.kind.value] }}">{{ filler.type }}</span>
-                            </td>
-                            <td class="px-4 py-2 align-top text-slate-600 sm:pr-6">
-                                {{ item.context.before }} <strong class="font-semibold text-slate-900">{{ item.context.filler }}</strong> {{ item.context.after }}
-                            </td>
-                        </tr>
+            <div class="seconds" data-cols="{{ cols }}" style="--cols: {{ cols }}; --cell: {{ cols == 10 ? 48 : 24 }}px"
+                 role="group" aria-label="The Recording, second by second. Filled cells are Fillers."
+                 data-action="click->report-player#seekCell">
+                <div class="seconds__lines">
+                    {# Ten seconds at a time; CSS sets how many of these sit on one line. #}
+                    {% for decade in 0..((total - 1) // 10) %}
+                        <div class="decade">
+                            <span class="seconds__t">{{ report_helpers.clock(decade * 10) }}</span>
+                            <span class="seconds__cells">
+                                {%- for i in 0..9 -%}
+                                    {%- set second = decade * 10 + i -%}
+                                    {%- set here = by_second['s' ~ second] ?? [] -%}
+                                    {%- if second >= total -%}
+                                        <span class="cell cell--off"></span>
+                                    {%- elseif here is empty -%}
+                                        <span class="cell" data-report-player-target="cell" data-second="{{ second }}"></span>
+                                    {%- else -%}
+                                        {%- set kinds = here|map(f => f.kind.value)|reduce((seen, kind) => kind in seen ? seen : seen|merge([kind]), []) -%}
+                                        <button type="button" class="cell" data-report-player-target="cell" data-second="{{ second }}"
+                                                data-start="{{ (here|first).start }}" data-kind="{{ kinds|length > 1 ? 'mixed' : kinds|first }}"
+                                                aria-label="Play {{ here|map(f => f.type)|join(' and ') }} at {{ report_helpers.clock(second) }}, {{ here|map(f => f.kind.label)|join(' and ') }}"></button>
+                                    {%- endif -%}
+                                {%- endfor -%}
+                            </span>
+                        </div>
                     {% endfor %}
-                </tbody>
-            </table>
-        </section>
-    {% endif %}
+                </div>
+            </div>
 
-    <div>{{ include('speech/_delete_form.html.twig') }}</div>
+            <div class="transport">
+                <button type="button"
+                        data-report-player-target="playButton"
+                        data-action="report-player#toggle"
+                        aria-pressed="false"
+                        class="btn">Play</button>
+                <div data-report-player-target="waveform" class="transport__wave"></div>
+                <span data-report-player-target="time" class="transport__time">0:00 / {{ report_helpers.clock(report.durationSeconds) }}</span>
+            </div>
+            <p data-report-player-target="waveformError" hidden class="hint mt-3">
+                This browser couldn't draw the waveform, but Play and every link below still work.
+            </p>
+        </section>
+    </div>
+
+    <div class="sheet">
+        <div class="report">
+            {# 4. Filler list #}
+            {% if page.countedFillers is not empty %}
+                <section data-filler-list aria-labelledby="filler-list-heading">
+                    <h2 id="filler-list-heading" class="label label--ruled">Every Filler</h2>
+                    <table class="rows">
+                        <thead>
+                            <tr>
+                                <th scope="col">Time</th>
+                                <th scope="col">Type</th>
+                                <th scope="col">Context</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in page.countedFillers %}
+                                {% set filler = item.filler %}
+                                <tr data-start="{{ filler.start }}" data-action="click->report-player#seek"
+                                    data-report-player-target="row" data-end="{{ filler.end }}">
+                                    <td>
+                                        <button type="button" class="timelink"
+                                                aria-label="Play from {{ report_helpers.clock(filler.start) }}">{{ report_helpers.clock(filler.start) }}</button>
+                                    </td>
+                                    <td><i class="c" data-fill="{{ fills[filler.kind.value] }}" role="img" aria-label="{{ filler.kind.label }}"></i>{{ filler.type }}</td>
+                                    <td>
+                                        {{ item.context.before }} <strong>{{ item.context.filler }}</strong> {{ item.context.after }}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </section>
+            {% else %}
+                <section data-no-fillers class="praise">
+                    <h2>No Fillers counted</h2>
+                    <p>Nothing in this Speech counted as a Filler. Well done: keep using pauses instead.</p>
+                </section>
+            {% endif %}
+
+            <div class="report__side">
+                {# 5. Breakdown by Filler Type #}
+                {% if report.totalFillers > 0 %}
+                    <section data-breakdown aria-labelledby="breakdown-heading">
+                        <h2 id="breakdown-heading" class="label label--ruled">Fillers by type</h2>
+                        <p class="hint mt-3">{{ report.soundCount }} Filler Sound{{ report.soundCount == 1 ? '' : 's' }} · {{ report.phraseCount }} Filler Phrase{{ report.phraseCount == 1 ? '' : 's' }}</p>
+                        <ul class="types">
+                            {% for type, count in report.byType %}
+                                {% set kind = page.kindOf(type).value %}
+                                <li data-filler-type="{{ type }}" data-kind="{{ kind }}">
+                                    <span class="truncate">{{ type }}</span>
+                                    <span class="types__run" aria-hidden="true">{% for n in 1..count %}<i class="c" data-fill="{{ fills[kind] }}"></i>{% endfor %}</span>
+                                    <span data-count>{{ count }}</span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </section>
+                {% endif %}
+
+                {# 6. Coaching #}
+                {% set coaching = report.coaching %}
+                {% if coaching is not null %}
+                    <section data-coaching aria-labelledby="coaching-heading" class="coaching">
+                        <h2 id="coaching-heading" class="label label--ruled">Coaching</h2>
+                        <p data-coaching-summary class="coaching__summary">{{ coaching.summary }}</p>
+                        {% if coaching.patterns is not empty %}
+                            <h3>What we noticed</h3>
+                            <ul data-coaching-patterns>
+                                {% for pattern in coaching.patterns %}<li>{{ pattern }}</li>{% endfor %}
+                            </ul>
+                        {% endif %}
+                        {% if coaching.tips is not empty %}
+                            <h3>Try next time</h3>
+                            <ul data-coaching-tips>
+                                {% for tip in coaching.tips %}<li>{{ tip }}</li>{% endfor %}
+                            </ul>
+                        {% endif %}
+                    </section>
+                {% endif %}
+
+                {# Candidates the judge let stand, with its reason in plain sight (not only a tooltip). #}
+                {% set let_stand = page.segments|filter(segment => segment.occurrence is not null and not segment.occurrence.isFiller) %}
+                {% if let_stand is not empty %}
+                    <section data-not-counted aria-labelledby="not-counted-heading">
+                        <h2 id="not-counted-heading" class="label label--ruled">Checked and not counted</h2>
+                        <ul class="notes">
+                            {% for segment in let_stand %}
+                                {% set occurrence = segment.occurrence %}
+                                <li>
+                                    <button type="button" class="timelink justify-self-start" data-action="report-player#seek" data-start="{{ segment.start }}"
+                                            aria-label="Play from {{ report_helpers.clock(segment.start) }}">{{ report_helpers.clock(segment.start) }}</button>
+                                    <span>
+                                        <b>{{ segment.words|map(word => word.punctuated)|join(' ') }}</b>
+                                        <span>{{ occurrence.verdict.value == 'not_filler' ? (occurrence.reason ?? 'A genuine use of the word.') : 'This Candidate has not been judged.' }}</span>
+                                    </span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </section>
+                {% endif %}
+            </div>
+
+            {# 7. Interactive transcript #}
+            <section aria-labelledby="transcript-heading" class="report__main">
+                <h2 id="transcript-heading" class="label label--ruled">Transcript</h2>
+                <p class="hint mt-3">Press any word to hear it from there. Words with a dashed underline were checked and not counted; each reason is listed under "Checked and not counted".</p>
+                <p class="key mt-2">
+                    <span><i class="c" data-fill="solid" aria-hidden="true"></i>Filler Sound</span>
+                    <span><i class="c" data-fill="half" aria-hidden="true"></i>Filler Phrase</span>
+                    <span><i class="c" data-fill="dashed" aria-hidden="true"></i>Checked and not counted</span>
+                </p>
+                <div data-transcript class="transcript">
+                    {%- for segment in page.segments %}
+                        {% set occurrence = segment.occurrence %}
+                        {% set text = segment.words|map(word => word.punctuated)|join(' ') %}
+                        {% if occurrence is null %}
+                            <button type="button" tabindex="-1" data-report-player-target="segment" data-action="report-player#seek" data-start="{{ segment.start }}"
+                                    class="w">{{ text }}</button>
+                        {% elseif occurrence.isFiller %}
+                            <button type="button" data-report-player-target="segment" data-action="report-player#seek" data-start="{{ segment.start }}"
+                                    data-verdict="filler" data-kind="{{ occurrence.kind.value }}"
+                                    title="{{ occurrence.kind.label }}: {{ occurrence.type }}{{ occurrence.reason ? ' (' ~ occurrence.reason ~ ')' }}"
+                                    class="w">{{ text }}</button>
+                        {% else %}
+                            <button type="button" tabindex="-1" data-report-player-target="segment" data-action="report-player#seek" data-start="{{ segment.start }}"
+                                    data-verdict="{{ occurrence.verdict.value }}" data-kind="{{ occurrence.kind.value }}"
+                                    title="Not counted: {{ occurrence.verdict.value == 'not_filler' ? (occurrence.reason ?? 'a genuine use of the word') : 'this Candidate has not been judged' }}"
+                                    class="w">{{ text }}</button>
+                        {% endif %}
+                    {%- endfor %}
+                </div>
+            </section>
+
+            {# The page ends on the next attempt; Delete sits beside it as the secondary action. #}
+            <div class="report__wide actions">
+                <a class="btn" href="{{ path('app_home') }}#recorder">New Speech</a>
+                {{ include('speech/_delete_form.html.twig') }}
+            </div>
+        </div>
+    </div>
 </div>

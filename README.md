@@ -18,7 +18,7 @@ Built for the Symfony AI & MCP Hackathon (November 2026) with Symfony 8.1 and Sy
 2. **Transcribe** it with Deepgram Nova-2, which keeps filler sounds and times every word.
 3. **Find the Fillers.** Filler Sounds ("um", "uh", "hmm", …) are matched in code. Filler Phrases ("like", "so", "you know", "I mean", "right", "well", …) are only *Candidates*: "I like pizza" isn't a filler. Claude Haiku judges each one in the context of its sentence.
 4. **Coach.** Claude Sonnet writes a short summary, the patterns it sees and up to three tips, based only on the Fillers found.
-5. **Report.** Stat cards, the waveform with a marker per Filler, a breakdown by Filler Type, the Coaching, and the transcript with Fillers highlighted. Click any word or Filler to hear it.
+5. **Report.** Four figures, a grid with one cell per second where every Filler fills its cell, the waveform with a marker per Filler, a breakdown by Filler Type, the Coaching, and the transcript with Fillers highlighted. Click any cell, word or Filler to hear it.
 6. **Ask Claude.** Five MCP tools let Claude Code or Claude Desktop list your Speeches, read a Report, list the Fillers, compare two Speeches and generate a Practice Exercise.
 
 ## Requirements

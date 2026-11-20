@@ -3,72 +3,66 @@
 {% block title %}{{ speech.displayTitle }} · Ah Counter{% endblock %}
 
 {% block body %}
-    <main class="mx-auto max-w-3xl px-4 py-10 sm:py-16">
-        <a href="{{ path('app_home') }}" class="text-sm text-slate-500 hover:text-slate-800">&larr; All speeches</a>
-
-        <header class="mt-4 flex flex-wrap items-center gap-3">
-            <h1 class="text-3xl font-bold tracking-tight text-slate-900">{{ speech.displayTitle }}</h1>
-            {{ include('speech/_status_badge.html.twig', {status: speech.status}) }}
-        </header>
-        <p class="mt-1 text-sm text-slate-500">
-            Recorded {{ speech.createdAt|date('j M Y, H:i') }}
-            {%- if speech.durationSeconds is not null %}{% set seconds = speech.durationSeconds|round(0, 'floor') %} · {{ seconds // 60 }}:{{ '%02d'|format(seconds % 60) }}{% endif %}
-        </p>
-
-        {% if speech.status.value == 'failed' %}
-            <section class="mt-8 rounded-2xl border border-red-200 bg-white p-6 shadow-sm">
-                <h2 class="text-lg font-semibold text-slate-900">We couldn't analyse this Speech</h2>
-                <p role="alert" class="mt-2 text-slate-700">{{ speech.error ?? 'Something went wrong while processing it.' }}</p>
-                <div class="mt-6 flex flex-wrap items-start gap-3">
-                    <form method="post" action="{{ path('speech_retry', {id: speech.id}) }}">
-                        <input type="hidden" name="_token" value="{{ csrf_token(constant('App\\Controller\\SpeechController::RETRY_TOKEN_ID')) }}">
-                        <button type="submit" class="rounded-lg bg-slate-900 px-5 py-2 text-sm font-semibold text-white hover:bg-slate-700 focus:outline-none focus-visible:ring-4 focus-visible:ring-slate-300">Retry</button>
-                    </form>
-                    {{ include('speech/_delete_form.html.twig') }}
-                </div>
-            </section>
-        {% elseif page %}
+    <main id="main" class="flex flex-1 flex-col">
+        {% if speech.status.value != 'failed' and page %}
             {{ include('speech/_report.html.twig') }}
-        {% elseif speech.status.value == 'done' %}
-            {# Only a Speech finished before the pipeline saved Fillers can get here. #}
-            <section class="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                <h2 class="text-lg font-semibold text-slate-900">No Report for this Speech</h2>
-                <p class="mt-2 text-slate-600">It finished processing without any Fillers saved, so there is nothing to show. Delete it and record again.</p>
-                <div class="mt-6">{{ include('speech/_delete_form.html.twig') }}</div>
-            </section>
         {% else %}
-            <section class="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
-                     data-controller="speech-status"
-                     data-speech-status-url-value="{{ path('speech_status', {id: speech.id}) }}"
-                     data-speech-status-status-value="{{ speech.status.value }}">
-                <h2 class="text-lg font-semibold text-slate-900">
-                    {{ speech.status.value == 'pending' ? 'Waiting to start…' : 'Analysing your Speech…' }}
-                </h2>
-                <p class="mt-1 text-sm text-slate-500">This usually takes under a minute. The page updates by itself.</p>
+            <div class="top top--fill">
+                {{ include('speech/_plane.html.twig') }}
 
-                <ol class="mt-6 space-y-4">
-                    {% for step in steps %}
-                        {% set state = step.order < speech.status.order ? 'complete' : (step == speech.status ? 'current' : 'upcoming') %}
-                        <li class="flex items-center gap-3" data-step="{{ step.value }}" data-step-state="{{ state }}"
-                            {% if state == 'current' %}aria-current="step"{% endif %}>
-                            {% if state == 'complete' %}
-                                <span class="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-600 text-white" aria-hidden="true">
-                                    <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.7 5.3a1 1 0 0 1 0 1.4l-8 8a1 1 0 0 1-1.4 0l-4-4a1 1 0 1 1 1.4-1.4L8 12.58l7.3-7.3a1 1 0 0 1 1.4 0Z" clip-rule="evenodd"/></svg>
-                                </span>
-                            {% elseif state == 'current' %}
-                                <span class="flex h-7 w-7 items-center justify-center" aria-hidden="true">
-                                    <svg class="h-6 w-6 animate-spin text-sky-600" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" class="opacity-20"/><path d="M22 12a10 10 0 0 0-10-10" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>
-                                </span>
-                            {% else %}
-                                <span class="h-7 w-7 rounded-full border-2 border-slate-200" aria-hidden="true"></span>
-                            {% endif %}
-                            <span class="{{ state == 'upcoming' ? 'text-slate-400' : 'font-medium text-slate-900' }}">
-                                {{ {transcribing: 'Transcribing', analysing: 'Finding Fillers', coaching: 'Writing Coaching'}[step.value] }}
-                            </span>
-                        </li>
-                    {% endfor %}
-                </ol>
-            </section>
+                {% if speech.status.value == 'failed' %}
+                    <section class="work">
+                        <h2 class="state-title">We couldn't analyse this Speech</h2>
+                        <p role="alert" class="notice">{{ speech.error ?? 'Something went wrong while processing it.' }}</p>
+                        <div class="actions">
+                            <form method="post" action="{{ path('speech_retry', {id: speech.id}) }}">
+                                <input type="hidden" name="_token" value="{{ csrf_token(constant('App\\Controller\\SpeechController::RETRY_TOKEN_ID')) }}">
+                                <button type="submit" class="btn">Retry</button>
+                            </form>
+                            {{ include('speech/_delete_form.html.twig') }}
+                        </div>
+                        {% if speech.durationSeconds is not null %}
+                            <h3 class="label mt-12">One cell is one second. None were analysed.</h3>
+                            {{ include('speech/_empty_grid.html.twig', {seconds: speech.durationSeconds, mode: 'off'}) }}
+                        {% endif %}
+                    </section>
+                {% elseif speech.status.value == 'done' %}
+                    {# Only a Speech finished before the pipeline saved Fillers can get here. #}
+                    <section class="work">
+                        <h2 class="state-title">No Report for this Speech</h2>
+                        <p class="hint">It finished processing without any Fillers saved, so there is nothing to show. Delete it and record again.</p>
+                        <div class="actions">{{ include('speech/_delete_form.html.twig') }}</div>
+                    </section>
+                {% else %}
+                    <section class="work"
+                             data-controller="speech-status"
+                             data-speech-status-url-value="{{ path('speech_status', {id: speech.id}) }}"
+                             data-speech-status-status-value="{{ speech.status.value }}">
+                        <h2 class="state-title">
+                            {{ speech.status.value == 'pending' ? 'Waiting to start…' : 'Analysing your Speech…' }}
+                        </h2>
+                        <p class="hint">This usually takes under a minute. The page updates by itself.</p>
+                        {% if speech.durationSeconds is not null %}
+                            <h3 class="label mt-6">One cell is one second</h3>
+                            {{ include('speech/_empty_grid.html.twig', {seconds: speech.durationSeconds, mode: 'sweep'}) }}
+                        {% else %}
+                            <div class="ticker mt-6" aria-hidden="true"></div>
+                        {% endif %}
+
+                        <ol class="steps">
+                            {% for step in steps %}
+                                {% set state = step.order < speech.status.order ? 'complete' : (step == speech.status ? 'current' : 'upcoming') %}
+                                <li data-step="{{ step.value }}" data-step-state="{{ state }}"
+                                    {% if state == 'current' %}aria-current="step"{% endif %}>
+                                    <i class="c" data-fill="{{ {complete: 'solid', current: 'half', upcoming: 'dashed'}[state] }}" aria-hidden="true"></i>
+                                    <span>{{ {transcribing: 'Transcribing', analysing: 'Finding Fillers', coaching: 'Writing Coaching'}[step.value] }}</span>
+                                    <small>{{ {complete: 'Done', current: 'Now', upcoming: 'Next'}[state] }}</small>
+                                </li>
+                            {% endfor %}
+                        </ol>
+                    </section>
+                {% endif %}
+            </div>
         {% endif %}
     </main>
 {% endblock %}
